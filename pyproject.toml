@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "barnaby-bear"
+version = "0.1.0"
+description = "Local OpenCV hand gesture and facial expression starter for Barnaby Bear"
+requires-python = ">=3.10,<3.14"
+dependencies = ["numpy>=1.24,<3", "opencv-python>=4.10,<5"]
+
+[project.scripts]
+barnaby = "barnaby.app:main"
+barnaby-models = "barnaby.models:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+barnaby = ["model_manifest.json", "_vendor/LICENSE*", "_vendor/README.md"]
