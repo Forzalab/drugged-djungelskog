@@ -1,0 +1,27 @@
+# Format: <DOI or URL> · <goal> · <blocker> · <MUST|NICE> · <council ref (brain path, projects/cocaine-bear/)>
+# Fetch legally (library access / normal browser). Drop files back to the S0 runner or RV session.
+# S0 needed sources (manual fetch by Tony)
+## A. research papers / tech pages
+10.30630/joiv.7.1.1032 · S0-1 · bot-block · MUST · _files/council/S0/S0-facts.md:L86
+https://upcommons.upc.edu/bitstreams/d540859a-abae-495f-9591-ab2b53da559c/download · S0-1 · bot-block · MUST · _files/council/S0/S0-facts.md:L95
+10.1109/ECAI69016.2026.11613654 · S0-1 · paywall · MUST · _files/council/S0/S0-facts.md:L96
+https://www.researchgate.net/publication/404775924_AI-Based_Virtual_Mouse_Control_Using_Hand_Gesture_Recognition_with_OpenCV_and_MediaPipe · S0-1 · bot-block · MUST · _files/council/S0/S0-facts.md:L97
+https://www.halloweenforum.com/threads/hacking-a-spirit-footpad-or-try-me-button-possible.107521/ · S0-8 · paywall · MUST · _files/council/S0/trail/S0-8.md:L7
+https://www.instructables.com/Control-Your-Halloween-Decorations-With-Arduino/ · S0-8 · bot-block · MUST · _files/council/S0/S0-facts.md:L584
+https://www.scribd.com/document/245933361/Control-Your-Halloween-Decorations-With-Arduino · S0-8 · bot-block · MUST · _files/council/S0/S0-facts.md:L584
+https://www.halloweenforum.com/threads/converting-a-gemmy-try-me-button-to-always-on.82865/ · S0-8 · paywall · MUST · _files/council/S0/S0-facts.md:L591
+https://www.youtube.com/watch?v=su1vdMPjemE · S0-8 · abstract-only · MUST · _files/council/S0/S0-facts.md:L671
+10.3389/fimag.2026.1972869 · S0-2 · abstract-only · NICE · _files/council/S0/S0-facts.md:L184
+https://raspberrypi.stackexchange.com/questions/147341/raspberry-pi-5-servo-jitter · S0-4 · bot-block · NICE · _files/council/S0/trail/S0-4.md:L30
+https://subethasoftware.com/category/halloween/ · S0-8 · snippet-only · NICE · _files/council/S0/S0-facts.md:L642
+https://www.hauntforum.com/threads/hacking-audio-of-spirit-animatronics.44756/ · S0-8 · paywall · NICE · _files/council/S0/S0-facts.md:L672
+## B. bear-side sources (URL may name the product)
+# SPOILER WARNING: links below can name the bear product. Skim past until S5 if you want.
+https://www.eximpedia.app/hs-code/952614 · S0-5 · bot-block · MUST · _files/council/S0/S0-facts.md:L476
+https://www.ebay.com/itm/278182307712 · S0-6 · bot-block · MUST · _files/council/S0/S0-facts.md:L517
+https://www.amazon.com/product-reviews/B0D88CZYVG · S0-6 · login · MUST · _files/council/S0/S0-facts.md:L525
+https://www.spirithalloween.com/product/5-ft-10-in-barnaby-the-bear-animatronic/266092.uts · S0-6 · bot-block · MUST · _files/council/S0/S0-facts.md:L525
+https://www.halloweenforum.com/threads/multi-prop-remote-from-spirit-can-this-be-hacked.199395/ · S0-6 · paywall · MUST · _files/council/S0/S0-facts.md:L532
+https://device.report/seasonal-visions · S0-6 · bot-block · MUST · _files/council/S0/S0-facts.md:L536
+https://www.youtube.com/watch?v=n_O2B_FsSxk · S0-6 · login · MUST · _files/council/S0/S0-facts.md:L546
+https://www.youtube.com/watch?v=iu3gMEk8PGE · S0-6 · login · MUST · _files/council/S0/S0-facts.md:L568
