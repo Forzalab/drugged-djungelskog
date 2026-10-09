@@ -11,6 +11,7 @@ from .camera import Camera
 from .gestures import HAND_CONNECTIONS, StableLabel
 from .models import DEFAULT_MODEL_DIR
 from .reactions import PerceptionEvent, on_perception
+from .trigger import OneShot
 from .vision import Observation, Vision
 
 
@@ -51,6 +52,8 @@ def main(argv=None) -> None:
     parser.add_argument("--realtime", action="store_true", help="Play a video at its source frame rate")
     parser.add_argument("--loop", action="store_true", help="Repeat a video until Q or Ctrl+C")
     parser.add_argument("--save-video", type=Path, help="Write an annotated MP4, including in headless mode")
+    parser.add_argument("--trigger", metavar="GESTURE", help="Print 'BEAR: dance' once per shown GESTURE (off by default)")
+    parser.add_argument("--trigger-cooldown", type=float, default=20.0, help="Seconds between triggers (one bear dance)")
     parser.add_argument("--check", action="store_true", help="Verify weights and run all models without a camera")
     args = parser.parse_args(argv)
     if not math.isfinite(args.interval) or args.interval < 0:
@@ -69,6 +72,7 @@ def main(argv=None) -> None:
         camera = Camera(args.source, args.width, args.height, args.picamera, args.realtime, args.loop)
         gesture_filter, expression_filter = StableLabel(args.stable_frames), StableLabel(args.stable_frames)
         previous = ("none", "none")
+        trigger = OneShot(args.trigger, args.trigger_cooldown) if args.trigger else None
         count, next_inference = 0, 0.0
         observation = Observation()
         print("Barnaby vision running. Press Q in the preview or Ctrl+C to stop.")
@@ -91,8 +95,11 @@ def main(argv=None) -> None:
                 next_inference = now + args.interval
                 labels = (gesture_filter.update(observation.gesture), expression_filter.update(observation.expression))
                 if labels != previous:
-                    on_perception(PerceptionEvent(*labels, observation.hand_confidence,
-                                                   observation.face_confidence, observation.inference_ms))
+                    event = PerceptionEvent(*labels, observation.hand_confidence,
+                                            observation.face_confidence, observation.inference_ms)
+                    on_perception(event)
+                    if trigger and trigger.feed(event, now):
+                        print("BEAR: dance", flush=True)
                     previous = labels
             if not args.headless or args.save_video:
                 overlay(small, observation, gesture_filter.value, expression_filter.value)

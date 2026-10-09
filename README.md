@@ -60,6 +60,19 @@ python -m barnaby --picamera --headless
 This requires the OS OpenCV package to be version 4.10 or newer.
 Remove `--headless` to show the preview on a desktop.
 
+## Trigger (opt-in)
+
+`--trigger GESTURE` prints `BEAR: dance` once each time that gesture is shown.
+A cooldown and a re-arm delay (the gesture must be gone for 1 s) keep a held
+hand, a face change, or a flickering hand from firing it again.
+
+```bash
+python -m barnaby --trigger thumbs_up
+```
+
+`--trigger-cooldown SECONDS` sets the cooldown (default 20).
+Cooldown = measure one full dance on the real bear, then set `--trigger-cooldown`.
+
 ## After PC changes
 
 Commit and push on the PC. Then, from the repo folder on the Pi:
