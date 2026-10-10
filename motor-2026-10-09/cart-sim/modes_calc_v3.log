@@ -1,0 +1,142 @@
+{
+ "cog_height_m": 0.659,
+ "tip_accel_by_case_ms2": {
+  "fixed": 5.38,
+  "pinned_gap": 1.23,
+  "velcro_only": 1.79,
+  "frame_ziptied_gap": 3.28
+ },
+ "tip_velcro_detail": {
+  "low": {
+   "b_m": 0.08,
+   "a_tip_no_velcro": 1.4,
+   "a_tip_with_velcro_peel": 1.56
+  },
+  "mid": {
+   "b_m": 0.12,
+   "a_tip_no_velcro": 1.79,
+   "a_tip_with_velcro_peel": 2.45
+  },
+  "high": {
+   "b_m": 0.16,
+   "a_tip_no_velcro": 2.1,
+   "a_tip_with_velcro_peel": 3.24
+  }
+ },
+ "tip_accel_whole_cart_ms2": {
+  "longitudinal": 8.88,
+  "transverse": 5.38
+ },
+ "post": {
+  "side_m": 0.022,
+  "wall_m": 0.0012,
+  "EI_Nm2": 1444.6,
+  "M_yield_Nm": 164.2,
+  "a_yield_ms2": 23.9,
+  "slot_clear_across_m": [
+   0.001,
+   0.002,
+   0.004
+  ],
+  "slot_clear_along_m": [
+   0.05,
+   0.1,
+   0.12
+  ]
+ },
+ "jerk_accel_ms2": {
+  "commanded": 11.4,
+  "realistic_low": 0.6,
+  "realistic_high": 0.82
+ },
+ "single_pulse_energy_check": {
+  "velcro_only": {
+   "E_tip_J": 1.179,
+   "KE_pulse_J": 0.0079,
+   "single_pulse_overturns": false
+  }
+ },
+ "resonant_buildup_at_sway_mode": {
+  "per_harmonic_base_accel_ms2": 0.1,
+  "response_by_case": {
+   "fixed": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 0.4,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 0.2,
+     "cycles_to_build": 10
+    }
+   },
+   "frame_ziptied_gap": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 0.5,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 0.3,
+     "cycles_to_build": 10
+    }
+   },
+   "pinned_gap": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 1.9,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 1.1,
+     "cycles_to_build": 10
+    }
+   },
+   "velcro_only": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 11.5,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 6.7,
+     "cycles_to_build": 10
+    }
+   }
+  }
+ },
+ "stack": {
+  "m_kg": 11.0,
+  "I_base_kgm2": 6.89,
+  "h_bear_com_m": 1.01,
+  "h_cm_m": 0.659
+ },
+ "whole_cart": {
+  "m_kg": 45.0,
+  "h_cm_m": 0.365
+ },
+ "masses_source": "masses.json v2 (photo-based) total mid 43.5 kg"
+}
+bear_on_post_sway_FIXED_base              3.14    3.38    4.14  z=0.03
+bear_on_frame_sway_ZIPTIED_gap            1.79    2.82    3.64  z=0.04
+frame_rocking_on_zip_ties                 2.28    6.52   11.21  z=0.06
+shell_dance_slip_on_post                  0.40    0.75    1.50  z=0.1
+bear_on_post_sway_PINNED_gap              0.97    1.51    2.06  z=0.05
+stack_rocking_VELCRO_only                 0.30    0.61    1.14  z=0.08
+post_in_slot_rattle_impact                6.00   10.00   25.00  z=0.1
+ball_shell_ovalling_seam                 15.00   30.00   60.00  z=0.05
+cart_bounce_vertical                      6.35    9.19   14.03  z=0.08
+cart_pitch_roll_on_casters                4.45    7.36   12.63  z=0.08
+cart_horizontal_on_carpet                 3.67    6.37   11.09  z=0.1
+drivetrain_loaded_stepper_spring         13.46   16.87   23.17  z=0.03
+stepper_rotor_midband_resonance         180.38  236.17  303.10  z=0.02
+arm_cantilever_hollow_frame               1.50    3.50    7.00  z=0.06
+head_on_neck                              2.50    4.50    8.00  z=0.06
+torso_on_dance_pivot                      0.50    1.20    2.50  z=0.05
+caster_swivel_kinematic_trail             0.14    0.18    0.24  z=0.5
+caster_swivel_rattle_play                 8.00   15.00   30.00  z=0.08
+cart_pitch_load_transfer                  4.00    7.00   12.00  z=0.08

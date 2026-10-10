@@ -1,0 +1,131 @@
+# RESONANCE.md — earthquake-engineer pass on the Barnaby cart (agent A)
+
+Numbers come from `modes_calc.py` → `modes.json` (re-run after editing masses.json or any ASSUMED value).
+Masses: `masses.json` (agent B): whole cart 32 / 44.5 / 56 kg (low/mid/high), bear 9.07 kg, ball 1–6 kg.
+
+Labels: **FACT** = measured or documented. **ASSUMED** = my engineering estimate, replace when measured.
+
+## 0. Picture of the structure
+
+```
+                 head (~1 kg)            z = 2.6 m above floor
+                 torso 4-5 kg  <- Try Me dance: "torso moves side-to-side on moving ball" (box text, FACT)
+                 armature (steel tube, ASSUMED 16-25 mm)
+   bear feet on ball top        z = 0.82 m
+                 EPS ball 60-70 cm, 1-6 kg
+   ball on deck                 z = 0.17 m   <- fixation UNKNOWN: resting / strapped / bolted
+   plywood + carpet on steel dolly 30x18 in, 2 rear driven 6 cm wheels + front swivel casters
+   carpet floor
+```
+Stack (bear + ball) CoM = **1.17 m above the deck** (mid), mass 12.1 kg, I about base edge 19.5 kg·m².
+Whole cart CoM = 0.52 m above floor.
+
+## 1. Excitations the drive injects (FACT for the code, ASSUMED where marked)
+
+| # | source | frequency | strength | note |
+|---|---|---|---|---|
+| E1 | full-step pulse train (main.cc: 2 ms + 2 ms) | **250 Hz** + 500, 750 … | 1.8° rotor / 0.18 mm wheel per step | torque ripple through gearbox; buzz; set-screw loosening |
+| E2 | stepper rotor mid-band resonance | 180 / 236 / 303 Hz | — | **250 steps/s sits inside the rotor's own resonance** → missed steps, chatter when wheel slips or backlash opens (explains "small wiggle" / stall as well as torque) |
+| E3 | segment pattern 0.8 s on / 1 s off / 0.8 s reverse / 1 s off | fundamental **0.278 Hz**, harmonics every 0.278 Hz | each odd-ish harmonic up to 0.10 m/s² (impulse train → flat comb) | with NO ramp the comb is flat to >10 Hz; harmonics 3,5,7,11,13 (0.83–3.6 Hz) fall exactly in the bear sway band |
+| E4 | start/stop jerk | pulse 4 ms commanded, ~20–40 ms real | commanded 11.4 m/s²; **real 0.6–0.8 m/s²** (torque-limited, 44.5 kg) | motor cannot deliver the commanded jerk; the stall/slip is what limits it |
+| E5 | reversal backlash impacts (gearbox + clamp hub) | 2 per 3.6 s cycle (0.56 Hz) | broadband | hammering on set screws |
+| E6 | planetary gear mesh (ASSUMED ~46 ring teeth) | ~11 Hz (8–14) at 0.241 rev/s output; planet pass ~0.7 Hz | small | lands in cart bounce band |
+| E7 | carpet stick-slip of the tyres | 2–30 Hz broadband | load-share dependent | |
+| E8 | **caster flip at reversal** (Tony) | each reversal | lateral scrub ≈ 39 N per caster; up to 1.8 m/s² lateral kick if 2 casters scrub | a trailing caster needs ≈ π·e/2 = 5–8 cm of travel to swing 180° (trail e = 3–5 cm ASSUMED); a segment moves 0.1–3.4 cm → **the flip never completes, casters sit sideways and scrub** |
+| E9 | **longitudinal load transfer** (Tony) | with each jerk | ΔN = m·a·h/L = 24–32 N at a = 0.6–0.8 m/s² (L = 0.6 m ASSUMED) = ±14–18 % of the 175 N rear load | rear wheels gain load when pushing the cart rearward-first, lose it when braking a forward run → traction 119 N vs 91 N → asymmetric slip → net creep per cycle; at the stack tip accel (1.7 m/s²) ΔN = 65 N = 37 % |
+| E10 | Try Me dance torso sway | 20 s cycle (FACT, measured); sway rate ASSUMED 0.4–1.5 Hz | moves 4–5 kg torso | sits inside the sway band by design (manufacturer designed it for a floor, not a 17 cm-high cart) |
+
+Harmonic amplitudes of E3 (acceleration, worst phase): `a_n = (2Δv/T)·|1 − e^{−iω0.8} − e^{−iω1.8} + e^{−iω2.6}|`, Δv = 0.0455 m/s, T = 3.6 s.
+With a linear ramp of duration τ the comb is multiplied by `|sinc(π f τ)|`: τ = 1 s cuts the 0.83 Hz harmonic 5×, the 1.9 Hz one 35×, 3 Hz one 55×.
+
+## 2. Natural frequencies (first principles, low / mid / high in Hz)
+
+| mode | low | mid | high | ζ | formula / assumptions |
+|---|---|---|---|---|---|
+| M1 bear sway (armature cantilever, inverted pendulum) | 0.7 | 2.0 | 4.7 | 3 % | `f = (1/2π)√(3EI/(m L³) − g/L)`; steel tube 16–25 mm OD, 1–1.2 mm wall, L 0.9–1.3 m, tip mass 4–6 kg → bare tube 2.6–6.3 Hz; ×0.75 for joint/bolt compliance; low floored at 0.7 Hz by the torso-pivot backlash. ASSUMED armature |
+| M2 stack rocking on its fixation | 0.8 | 2.1 | 5.9 | 5 % | rigid bear+ball on fixation springs: `k_θ = 2 k r² − m g h_cm`, k = 5 kN/m (soft strap) … 150 kN/m (bolts/cradle), r = 0.25–0.30 m; `I = m_bear h² + m_ball·1.4R²`. **Resting ball: k_θ < 0 → no mode, statically unstable** |
+| M3 EPS ball body flexure (if bear bolted through foam) | 3.9 | 5.2 | 6.5 | 5 % | sphere as short beam, E = 3–8 MPa, `k_θ = EI/L`, I at 60 % radius |
+| M4 cart vertical bounce | 6.4 | 9.2 | 13.7 | 8 % | 6 contacts, caster PU + carpet/pad in series 15–40 kN/m each, m = 32–56 kg |
+| M5 cart pitch/roll on casters (incl. load-transfer pitch) | 4.4 | 7.4 | 12.3 | 8 % | same springs, rotational; static pitch from ΔN = 1.6 mrad → 4 mm at the bear's head before amplification |
+| M6 cart horizontal on tyre/carpet shear | 3.7 | 6.4 | 10.8 | 10 % | 5–25 kN/m per contact; stick-slip, nonlinear |
+| M7 drivetrain, loaded (rotor + cart on the stepper's magnetic spring) | 13.5 | 17 | 22.6 | 3 % | `k_m = T_h·N_r = 0.19 N·m × 50 = 9.5 N·m/rad`, `J = J_rotor + (J_w + m r²/2)/(G² η)`; rings after every start/stop |
+| M8 stepper rotor alone (mid-band) | 180 | 236 | 303 | 2 % | `f = (1/2π)√(k_m/J_rotor)`, J = 43 g·cm² (GUESS) — **250 steps/s is inside** |
+| M9 arm cantilever | 2 | 5.5 | 10 | 6 % | 6 mm steel rod 0.5 m, 0.25 kg eff. ASSUMED |
+| M10 head on neck | 3 | 5 | 8 | 6 % | 1 kg head, joint 0.4–2.5 kN/m ASSUMED |
+| M11 torso on dance pivot (gear backlash) | 0.5 | 1.2 | 2.5 | 5 % | 4 kg at 0.4 m above pivot; rattles when unpowered ASSUMED |
+| M12 caster swivel, kinematic trail mode | 0.14 | 0.18 | 0.24 | ~50 % | `f = V/(2π e)`, V = 0.0455 m/s, e = 3–5 cm; swivel friction makes it near-overdamped. **Caster flutter/shimmy needs V ≈ 0.5–2 m/s → not expected at 4.5 cm/s** |
+| M13 caster swivel rattle (bearing/axle play) | 8 | 15 | 30 | 8 % | lateral tyre stiffness 10–40 kN/m, ~0.3 kg fork+wheel; excited at reversals and by E1 |
+
+## 3. Overlap table (X = excitation band contains the mode band)
+
+| | E3 comb 0.28–10 Hz (no ramp) | E4/E5 start impulses (broadband) | E6 mesh 8–14 Hz | E7 stick-slip 2–30 Hz | E1 250 Hz | E8 caster scrub (lateral, per reversal) | E10 dance 0.4–1.5 Hz |
+|---|---|---|---|---|---|---|---|
+| M1 sway 0.7–4.7 | **X** (harmonics 3–17) | X | | X | | **X** (lateral) | **X** |
+| M2 stack rocking 0.8–5.9 | **X** | X | | X | | **X** | X |
+| M11 torso pivot 0.5–2.5 | **X** | X | | | | X | **X** |
+| M4/M5/M6 cart 3.7–13.7 | X (weak, n ≥ 13) | X | **X** | X | | X | |
+| M7 drivetrain 13–23 | | **X** (rings every start) | | X | | | |
+| M8 rotor 180–303 | | | | | **X** | | |
+| M13 caster rattle 8–30 | | X | X | X | | X | |
+
+## 4. Dynamic amplification
+
+Steady-state resonant gain `Q = 1/(2ζ)` = 25 (2 %) … 10 (5 %), built up over ~Q cycles (10–25 cycles = 5–12 s at 2 Hz).
+E3 harmonic at the sway mode: base accel 0.10 m/s² → relative accel at the bear CoM **1.0–2.5 m/s²**, relative displacement **0.6–1.6 cm at the CoM, ~1.5–3 cm at the head**.
+Not catastrophic alone, but it is the SAME amplitude class as the tipping threshold below, and it is lateral/longitudinal sway on a 1.2 m-tall stack that the manufacturer designed for a static floor.
+A 1 s ramp cuts those harmonics 5–55× → response falls below 0.5 mm. Randomising the dwell (2–4 s) destroys coherence → gain ≈ 1–3 instead of Q.
+
+Cart pitch (M5, ζ 8 %, Q ≈ 6): static 4 mm at the head from ΔN, transient up to ~2 cm at the head if the pulse rise time is comparable to 1/(2·7 Hz) ≈ 70 ms — which is exactly the torque-limited start. A ramp ≥ 0.3 s removes it.
+
+## 5. Tipping / rolling checks (rigid-body, quasi-static `a_tip = g·b/h`)
+
+| body | h_cm | b (half base) | a_tip | vs realistic jerk 0.6–0.8 m/s² |
+|---|---|---|---|---|
+| stack, **ball resting** on deck | 1.17 m | ~0.02 m (EPS Hertz contact patch) | **0.17 m/s²** | FAILS by 4× — a free ball also rolls: a solid sphere on an accelerating plate lags by 5/7 of the plate travel → 2.5 cm per segment with a 9 kg inverted pendulum on top → topples |
+| stack, strapped / in a ring, b = 0.20 m | 1.17 | 0.20 | **1.68 m/s²** | margin 2–2.8× only; commanded 11.4 m/s² would exceed it 7× if the motor could deliver it (it cannot — the stall is protecting the bear) |
+| stack, bolted plate b = 0.30 m | 1.17 | 0.30 | 2.51 m/s² | margin 3–4× |
+| whole cart, longitudinal | 0.52 | 0.38 | 7.2 m/s² | safe |
+| whole cart, transverse | 0.52 | 0.23 | 4.3 m/s² | safe, but the caster lateral kick (1.8 m/s²) is 40 % of it with the stack's own rocking on top |
+
+Single-pulse energy check (Housner): KE given to the stack by one 4.55 cm/s velocity jump = ½(m h Δv)²/I = 0.011 J, versus the potential hump to the tipping point `m g b²/(2h)` = 2.0 J (strapped), 0.02 J (resting). One pulse cannot overturn a strapped stack; it is marginal for a resting ball; **resonant accumulation (section 4) and caster kicks are what matter.**
+
+## 6. Fatigue / loosening (ranked)
+
+1. **Clamp-hub set screws on the gearbox D-shaft** — 250 Hz torque ripple + 2 backlash reversals per cycle (≈2000/h) + stall chatter. Classic failure in a day. Thread-locker (blue), flat/dimple on the shaft, check after 15 min of running.
+2. **Motor mount bolts / driver board on breadboard** — same ripple; Wago levers are fine, breadboard jumpers are not (intermittent STEP = random chatter).
+3. **Ball fixation (straps/zip ties)** — zip ties creep under 2 Hz cyclic load at ~50 N; EPS under a strap crushes locally → strap goes slack → b drops toward the resting case. Use a cradle ring or a plywood saddle, not ties.
+4. **Bear armature bolts at the feet/ball interface** — low cycle count (~2000 reversals/h) but moment arm 1.45 m × 9 kg; inspect.
+5. Caster swivel bolts — sideways scrub every reversal.
+
+## 7. Forbidden bands and the recommended profile
+
+Forbidden (Hz), also in modes.json:
+- **0.5–6**: bear sway, torso pivot, stack rocking. No periodic start/stop whose fundamental OR low harmonics land here with un-ramped steps → effectively: never start/stop without a ramp, never repeat the same period.
+- **6–15**: cart bounce/pitch + gear mesh. Pulse rise times of 30–80 ms excite it; ramp ≥ 0.3 s.
+- **15–40**: loaded drivetrain mode; avoid full-step rates 15–40 steps/s and start-stop at that cadence.
+- **150–330**: stepper mid-band; **the current 250 full steps/s is in it** — microstep (1/8 or 1/16: MS pins high) or move to < 100 or > 400 full steps/s.
+
+Recommended motion profile (feeds agent C):
+- Microstepping 1/16 (same speed = 4000 µsteps/s; ripple moves to 4 kHz, torque ripple ÷16).
+- **S-curve ramp ≥ 1 s** up and down (acceleration ≤ 0.5 m/s², i.e. < 1/3 of the strapped tipping accel, and well below the caster scrub kick). Zero-start full-speed commands are forbidden.
+- Peak accel budget: 0.5 m/s² (strapped), 0.8 m/s² (bolted), 0 (resting — fix the ball first).
+- Dwell ≥ 2 s, **randomised 2–4 s**, never a fixed cadence; vary segment lengths too. Run at least 6–8 cm per segment so casters can complete the flip (or replace front swivel casters by rigid wheels/skids, which also removes E8 and M12/13).
+- Do not drive during the 20 s Try Me dance (E10 already sits in the sway band; stacking lateral kicks on top is the worst case). Trigger the dance only when the cart has been still ≥ 2 s.
+- Prefer direction changes with a full stop + dwell, never a hard reverse.
+
+## 8. What to measure on the real bear (cheapest first)
+
+1. **Push-and-release + phone accelerometer** (Phyphox / Physics Toolbox, 100 Hz sampling): tape the phone to the bear's chest, push the head 2 cm sideways and release; read the frequency from the FFT or count zero crossings in 5 s. Gives M1/M2 and the damping from the decay (ζ = ln(x_n/x_{n+1})/(2π)). Repeat phone on the deck for M4/M5 (tap the deck). 5 minutes, pins the two most important numbers.
+2. **Is the ball fixed?** Push the ball sideways at the deck with ~50 N: does it roll/slide? If yes → resting case → stop until fixed. Measure the actual base half-width b (strap ring / saddle / bolt pattern).
+3. **Bathroom scale under each rear wheel** → rear load fraction (slip, load transfer); plus total mass.
+4. Phone on the deck while main.cc runs: spectrum shows 250 Hz buzz, the ~17 Hz ring after each start, whether the sway band gets energy (compare ramp vs no ramp).
+5. Count caster flips: run 3 cycles and watch whether the front casters complete their swing or sit sideways.
+6. Vref and chip marking on the drivers (sets T_h, k_m, hence M7/M8).
+
+## 9. Risk ranking
+
+1. Ball not positively fixed to the cart (UNKNOWN) → any drive topples the stack (a_tip 0.17 m/s²). Verify before anything else.
+2. Un-ramped periodic start/stop (every 3.6 s) → flat harmonic comb through the 0.7–5 Hz sway/rocking band; Q = 10–25 → 1–2.5 m/s² at the bear CoM, same order as the strapped tipping accel (1.7 m/s²).
+3. Caster scrub at reversals (segments too short for the 180° flip) → 1–2 m/s² lateral kicks on a 1.2 m-high stack + traction loss; plus ±15–18 % rear-load transfer making forward/reverse slip asymmetric (cart creeps).
+4. 250 full steps/s inside the stepper mid-band (180–300 Hz) → chatter/missed steps → broadband shaking, hub set screws loosen.
+5. Try Me dance (sway band by design) concurrent with cart motion.
