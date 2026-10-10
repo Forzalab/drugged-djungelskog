@@ -1,0 +1,127 @@
+{
+ "units": "kg, m",
+ "items": [
+  {
+   "name": "dolly_GFS-1830_steel",
+   "kg_low": 8.79,
+   "kg_mid": 9.25,
+   "kg_high": 9.72,
+   "source": "web:https://gorillamade.com/product/gfs-1830/ (20.4 lb, 30.25x18x5.8 in, platform 30x18 in, four 3in casters)"
+  },
+  {
+   "name": "wood_deck_plus_carpet",
+   "kg_low": 1.5,
+   "kg_mid": 3.0,
+   "kg_high": 4.5,
+   "source": "derived: 18x30in plywood 1/2-3/4in @ 500-600 kg/m^3 = 2.2-4.0 kg + carpet ~1.5 kg/m^2 x 0.35 m^2; GUESS thickness"
+  },
+  {
+   "name": "drive_motors_wheels_mounts",
+   "kg_low": 1.4,
+   "kg_mid": 1.5,
+   "kg_high": 1.8,
+   "source": "code:cart_sim.py MASS drive_elec (2x 0.46 kg 17HS15-1684S-PG5 + wheels/brackets)"
+  },
+  {
+   "name": "gold_ball_EPS_60-70cm_painted",
+   "kg_low": 1.0,
+   "kg_mid": 3.0,
+   "kg_high": 6.0,
+   "source": "derived: EPS 15-30 kg/m^3 x V(0.60..0.70m)=0.113-0.180 m^3 -> 1.7-5.4 kg solid + 0.3-0.6 kg paint/coating; low=hollow shell; GUESS until weighed"
+  },
+  {
+   "name": "barnaby_bear_animatronic",
+   "kg_low": 9.07,
+   "kg_mid": 9.07,
+   "kg_high": 11.34,
+   "source": "web:https://www.spirithalloween.com/product/5-ft-10-in-barnaby-the-bear-animatronic/266092.uts (70x43x28 in, ~20 lb; box 16x23x31 in); high=25 lb GUESS (+base plate/wiring)"
+  },
+  {
+   "name": "fog_machine",
+   "kg_low": 1.4,
+   "kg_mid": 2.5,
+   "kg_high": 4.5,
+   "source": "web:https://gearstation.eu/shop/adj-vf400/ (ADJ VF400 4 lb/2 kg); https://www.newegg.com/p/0TC-00FC-00006 (400W 1.36 kg); 1000W class 3.0-4.5 kg (ADJ Dyno-Fog II 10 lb)"
+  },
+  {
+   "name": "anker_solix_power_station",
+   "kg_low": 4.13,
+   "kg_mid": 10.9,
+   "kg_high": 12.9,
+   "source": "web:https://app.footprinthero.com/power-stations/anker-solix/c300 (C300 4.13 kg, 12V car socket 120W); https://www.ankersolix.com/products/C800-plus (C800 Plus 10.9 kg, 12V car out 120W); https://app.footprinthero.com/power-stations/anker-solix/c1000 (C1000 12.9 kg, 12V car socket 120W). Outlier: F2000 30.5 kg https://app.footprinthero.com/power-stations/anker-solix/f2000 (not in range; would add +17.6 kg). Model UNKNOWN"
+  },
+  {
+   "name": "raspberry_pi_breadboard_wiring",
+   "kg_low": 0.15,
+   "kg_mid": 0.3,
+   "kg_high": 0.6,
+   "source": "GUESS: Pi 4 ~46 g + breadboard + drivers + cables/case"
+  },
+  {
+   "name": "buffer_X",
+   "kg_low": 5.0,
+   "kg_mid": 5.0,
+   "kg_high": 5.0,
+   "source": "user: Tony's buffer X kg (parameter, default 5)"
+  }
+ ],
+ "buffer_kg": 5.0,
+ "total_kg_low": 32.4,
+ "total_kg_mid": 44.5,
+ "total_kg_high": 56.4,
+ "total_kg_without_buffer_mid": 39.5,
+ "rear_wheel_load_frac_est": {
+  "low": 0.25,
+  "mid": 0.4,
+  "high": 0.5,
+  "note": "share of total weight on the 2 driven rear wheels. 0.5 if front has only 2 casters and load is centred; ~0.33 if all 4 original GFS-1830 casters were kept (6 contact points, rigid deck -> statically indeterminate, depends on wheel height vs casters); 0.25 if driven wheels sit slightly high. MEASURE with bathroom scale."
+ },
+ "geometry": {
+  "deck_h_m": 0.17,
+  "deck_h_m_range": [
+   0.155,
+   0.19
+  ],
+  "ball_d_m": 0.65,
+  "ball_d_m_range": [
+   0.6,
+   0.7
+  ],
+  "bear_h_m": 1.778,
+  "bear_w_m": 1.092,
+  "bear_d_m": 0.711,
+  "stack_top_h_m": 2.6,
+  "bear_feet_h_m": 0.82,
+  "bear_com_frac_of_height": {
+   "low": 0.38,
+   "mid": 0.45,
+   "high": 0.55
+  },
+  "cog_h_m_low": 0.544,
+  "cog_h_m_mid": 0.518,
+  "cog_h_m_high": 0.583,
+  "cog_note": "whole loaded cart (all items incl. buffer; fog/power station/Pi/buffer on deck at ~0.25-0.30 m). low/mid/high use matching low/mid/high masses, deck, ball and bear CoM fraction, so 'high' = highest CoG case.",
+  "bear_on_ball_cog_h_m_low": 1.334,
+  "bear_on_ball_cog_h_m_mid": 1.34,
+  "bear_on_ball_cog_h_m_high": 1.408,
+  "track_m": 0.4,
+  "track_note": "GFS-1830 platform 18 in = 0.457 m wide; corner casters inset ~1-1.5 in each side -> ~0.38-0.42 m. Driven wheel track unmeasured.",
+  "wheelbase_m": 0.66,
+  "wheelbase_note": "platform 30 in = 0.762 m; caster centres inset ~2 in each end -> ~0.62-0.70 m. Unmeasured.",
+  "platform_m": [
+   0.762,
+   0.457
+  ],
+  "tip_note": "static tip angle sideways = atan((track/2)/cog_h); lateral accel to tip = g*(track/2)/cog_h. Bear 43 in wide overhangs 18 in deck."
+ },
+ "anker_note": "C300, C800 Plus, C1000 all have a 12V/10A car socket (120W). If it is an F-series (F1200/F2000, 20-30 kg) totals rise ~+10-18 kg.",
+ "unknowns": [
+  "Anker SOLIX model",
+  "fog machine model",
+  "ball construction (solid EPS vs hollow shell)",
+  "bear internal mass distribution",
+  "rear wheel load share",
+  "exact deck/wood thickness",
+  "whether bear is fixed to ball / ball fixed to deck"
+ ]
+}

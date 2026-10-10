@@ -1,0 +1,616 @@
+{
+ "generated_by": "modes_calc.py v2 (photo-based load path: bear on post, hollow shell, fixity cases)",
+ "masses_source": "masses.json v2 (photo-based) total mid 43.0 kg",
+ "load_path_case_used_for_tip": "velcro_only",
+ "fixity_cases": {
+  "fixed": {
+   "description": "post bottom bolted/screwed to the deck or to a base plate screwed to the deck",
+   "a_tip_ms2": 5.28,
+   "governing": "whole-cart transverse tip (5.28 m/s2); post yield at 24.1 m/s2 is not governing",
+   "sway_mode_hz": [
+    3.25,
+    3.51,
+    4.32
+   ]
+  },
+  "pinned_gap": {
+   "description": "post bottom captive (socket/hole/base plate with play) but free to rotate through a gap; shell + velcro take the moment after the gap closes",
+   "a_tip_ms2": 1.07,
+   "governing": "velcro/cradle tip accel divided by impact factor 2.0 (gap closure); the shell wall at the slot can also crush (hollow shell, local load ~m a h / R)",
+   "sway_mode_hz": [
+    0.98,
+    1.51,
+    2.06
+   ]
+  },
+  "velcro_only": {
+   "description": "post bottom reaches nothing (sketch 'gap'); bear+post hang on the shell via the slot and feet velcro; shell held by bottom velcro on the cradle",
+   "a_tip_ms2": 1.48,
+   "governing": "rigid stack about the cradle contact edge b=0.12 m, h_cm=0.80 m; velcro peel would raise it to 2.15 m/s2 but velcro fatigues under 2 Hz cyclic peel -> no credit; feet-velcro peel lets the bear+post fall THROUGH the gap",
+   "sway_mode_hz": [
+    0.3,
+    0.62,
+    1.15
+   ]
+  }
+ },
+ "modes": [
+  {
+   "name": "bear_on_post_sway_FIXED_base",
+   "f_low_hz": 3.25,
+   "f_mid_hz": 3.51,
+   "f_high_hz": 4.32,
+   "damping": 0.03,
+   "basis": "post bottom bolted to deck/base plate: steel square tube 22 mm x 1.2 mm wall (EI=1445 N m2) cantilever to bear CoM L=1.01 m, m_eff=bear+0.24 post, x0.5-1.0 for the wing-nut telescoping joint, gravity softening -g/L. PHOTO v2"
+  },
+  {
+   "name": "bear_on_post_sway_PINNED_gap",
+   "f_low_hz": 0.98,
+   "f_mid_hz": 1.51,
+   "f_high_hz": 2.06,
+   "damping": 0.05,
+   "basis": "post bottom captive but free to rotate through the gap; restoring stiffness only from the hollow shell at the slot edge + feet velcro, k=1-8 kN/m at r=ball diameter, minus m g h of bear+post. Amplitude-dependent: inside the gap the stiffness is ZERO and the post hits the slot edge (impact). PHOTO v2 + sketch 'gap'"
+  },
+  {
+   "name": "stack_rocking_VELCRO_only",
+   "f_low_hz": 0.3,
+   "f_mid_hz": 0.62,
+   "f_high_hz": 1.15,
+   "damping": 0.08,
+   "basis": "bear+post+shell as one rigid body on the ball-bottom velcro/cradle springs, k=2-15 kN/m at r=0.12 m minus m g h_cm; k_th<=0 (statically unstable, only velcro peel holds it) for the soft case -> floored at 0.3 Hz. PHOTO v2 sketch 'velcro' at ball bottom"
+  },
+  {
+   "name": "post_in_slot_rattle_impact",
+   "f_low_hz": 6.0,
+   "f_mid_hz": 10.0,
+   "f_high_hz": 25.0,
+   "damping": 0.1,
+   "basis": "post hits the slot edge across 1-4 mm clearance; hollow shell local stiffness 3-20 kN/m vs ~3 kg effective post+bear mass at the slot -> 6-25 Hz, strongly nonlinear (impact, chatter), excited by every start/stop and by cart pitch. SEEN slot clearance"
+  },
+  {
+   "name": "ball_shell_ovalling_seam",
+   "f_low_hz": 15.0,
+   "f_mid_hz": 30.0,
+   "f_high_hz": 60.0,
+   "damping": 0.05,
+   "basis": "thin hollow sphere ~0.47 m, two halves screwed at a seam: ovalling/seam-flap modes 15-60 Hz (ASSUMED wall 2-5 mm plastic/paper-mache); excited by 250 Hz step buzz subharmonics and by the post rattle; drums (noise), fatigue at the screw holes"
+  },
+  {
+   "name": "cart_bounce_vertical",
+   "f_low_hz": 6.53,
+   "f_mid_hz": 9.41,
+   "f_high_hz": 14.39,
+   "damping": 0.08,
+   "basis": "6 contacts, caster PU + carpet/pad in series 15-40 kN/m each; m = whole cart v2 (29-54 kg)"
+  },
+  {
+   "name": "cart_pitch_roll_on_casters",
+   "f_low_hz": 4.57,
+   "f_mid_hz": 7.52,
+   "f_high_hz": 12.95,
+   "damping": 0.08,
+   "basis": "same springs, rotational: f_rot ~ 0.7-0.9 f_bounce (ASSUMED)"
+  },
+  {
+   "name": "cart_horizontal_on_carpet",
+   "f_low_hz": 3.77,
+   "f_mid_hz": 6.52,
+   "f_high_hz": 11.37,
+   "damping": 0.1,
+   "basis": "tyre sidewall + carpet pile shear 5-25 kN/m per contact, 6 contacts; stick-slip"
+  },
+  {
+   "name": "drivetrain_loaded_stepper_spring",
+   "f_low_hz": 13.83,
+   "f_mid_hz": 17.25,
+   "f_high_hz": 23.75,
+   "damping": 0.03,
+   "basis": "rotor + cart mass (via r^2/G^2) on the stepper's magnetic spring k=T_h*50 (T_h=0.21 Nm at 1.25 A)"
+  },
+  {
+   "name": "stepper_rotor_midband_resonance",
+   "f_low_hz": 180.38,
+   "f_mid_hz": 236.17,
+   "f_high_hz": 303.1,
+   "damping": 0.02,
+   "basis": "rotor alone: f=(1/2pi)sqrt(k_m/J_rot); classic full-step resonance 100-300 Hz"
+  },
+  {
+   "name": "arm_cantilever_hollow_frame",
+   "f_low_hz": 1.5,
+   "f_mid_hz": 3.5,
+   "f_high_hz": 7.0,
+   "damping": 0.06,
+   "basis": "light hollow arm (~0.3 kg eff.) on a thin rod/plastic shoulder joint, 0.45 m; one arm raised, one horizontal (SEEN) -> asymmetric, lateral CoM offset ~2-4 cm"
+  },
+  {
+   "name": "head_on_neck",
+   "f_low_hz": 2.5,
+   "f_mid_hz": 4.5,
+   "f_high_hz": 8.0,
+   "damping": 0.06,
+   "basis": "~1 kg head + jaw motor on a short neck joint, k 0.3-2.5 kN/m (ASSUMED)"
+  },
+  {
+   "name": "torso_on_dance_pivot",
+   "f_low_hz": 0.5,
+   "f_mid_hz": 1.2,
+   "f_high_hz": 2.5,
+   "damping": 0.05,
+   "basis": "torso ~2-3 kg at ~0.3 m above the hip pivot restrained by the dance gear train; backlash rattles (ASSUMED mechanism)"
+  },
+  {
+   "name": "caster_swivel_kinematic_trail",
+   "f_low_hz": 0.14,
+   "f_mid_hz": 0.18,
+   "f_high_hz": 0.24,
+   "damping": 0.5,
+   "basis": "f=V/(2 pi e), V=0.0455 m/s, e=3-5 cm; swivel friction ~overdamped"
+  },
+  {
+   "name": "caster_swivel_rattle_play",
+   "f_low_hz": 8.0,
+   "f_mid_hz": 15.0,
+   "f_high_hz": 30.0,
+   "damping": 0.08,
+   "basis": "swivel bearing + axle play with lateral tyre stiffness, excited at reversals and by the 250 Hz buzz"
+  },
+  {
+   "name": "cart_pitch_load_transfer",
+   "f_low_hz": 4.0,
+   "f_mid_hz": 7.0,
+   "f_high_hz": 12.0,
+   "damping": 0.08,
+   "basis": "cart pitching on the contact springs when the jerk shifts dN=m a h/L"
+  }
+ ],
+ "excitations": [
+  {
+   "name": "segment_pattern_fundamental",
+   "f_hz": 0.278,
+   "harmonics_hz": [
+    0.28,
+    0.56,
+    0.83,
+    1.11,
+    1.39,
+    1.67,
+    1.94,
+    2.22,
+    2.5,
+    2.78,
+    3.06,
+    3.33,
+    3.61,
+    3.89,
+    4.17,
+    4.44,
+    4.72,
+    5.0,
+    5.28,
+    5.56,
+    5.83,
+    6.11,
+    6.39,
+    6.67
+   ],
+   "note": "0.8 s on / 1 s pause / 0.8 s reverse / 1 s pause; velocity-step impulses -> flat comb to >10 Hz without a ramp",
+   "comb": [
+    {
+     "n": 1,
+     "f_hz": 0.278,
+     "a_amp_ms2_noramp": 0.065,
+     "a_amp_ms2_ramp1s": 0.0571
+    },
+    {
+     "n": 2,
+     "f_hz": 0.556,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 3,
+     "f_hz": 0.833,
+     "a_amp_ms2_noramp": 0.0876,
+     "a_amp_ms2_ramp1s": 0.0167
+    },
+    {
+     "n": 4,
+     "f_hz": 1.111,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 5,
+     "f_hz": 1.389,
+     "a_amp_ms2_noramp": 0.0346,
+     "a_amp_ms2_ramp1s": 0.0074
+    },
+    {
+     "n": 6,
+     "f_hz": 1.667,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 7,
+     "f_hz": 1.944,
+     "a_amp_ms2_noramp": 0.0996,
+     "a_amp_ms2_ramp1s": 0.0028
+    },
+    {
+     "n": 8,
+     "f_hz": 2.222,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 9,
+     "f_hz": 2.5,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 10,
+     "f_hz": 2.778,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 11,
+     "f_hz": 3.056,
+     "a_amp_ms2_noramp": 0.0996,
+     "a_amp_ms2_ramp1s": 0.0018
+    },
+    {
+     "n": 12,
+     "f_hz": 3.333,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 13,
+     "f_hz": 3.611,
+     "a_amp_ms2_noramp": 0.0346,
+     "a_amp_ms2_ramp1s": 0.0029
+    },
+    {
+     "n": 14,
+     "f_hz": 3.889,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 15,
+     "f_hz": 4.167,
+     "a_amp_ms2_noramp": 0.0876,
+     "a_amp_ms2_ramp1s": 0.0033
+    },
+    {
+     "n": 16,
+     "f_hz": 4.444,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 17,
+     "f_hz": 4.722,
+     "a_amp_ms2_noramp": 0.065,
+     "a_amp_ms2_ramp1s": 0.0034
+    },
+    {
+     "n": 18,
+     "f_hz": 5.0,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 19,
+     "f_hz": 5.278,
+     "a_amp_ms2_noramp": 0.065,
+     "a_amp_ms2_ramp1s": 0.003
+    },
+    {
+     "n": 20,
+     "f_hz": 5.556,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 21,
+     "f_hz": 5.833,
+     "a_amp_ms2_noramp": 0.0876,
+     "a_amp_ms2_ramp1s": 0.0024
+    },
+    {
+     "n": 22,
+     "f_hz": 6.111,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 23,
+     "f_hz": 6.389,
+     "a_amp_ms2_noramp": 0.0346,
+     "a_amp_ms2_ramp1s": 0.0016
+    },
+    {
+     "n": 24,
+     "f_hz": 6.667,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    }
+   ]
+  },
+  {
+   "name": "start_stop_jerk",
+   "f_hz": null,
+   "a_cmd_ms2": 11.4,
+   "a_real_ms2": [
+    0.65,
+    0.88
+   ],
+   "note": "commanded: full speed in one 4 ms step; real: torque/traction-limited (mid masses v2)"
+  },
+  {
+   "name": "full_step_rate",
+   "f_hz": 250.0,
+   "harmonics_hz": [
+    250,
+    500,
+    750,
+    1000
+   ],
+   "note": "1.8 deg/step; torque ripple; buzz; drums the hollow shell"
+  },
+  {
+   "name": "stepper_midband_overlap",
+   "f_hz": 250.0,
+   "note": "250 steps/s inside the rotor's 170-330 Hz resonance band"
+  },
+  {
+   "name": "gearbox_mesh",
+   "f_hz": 11.1,
+   "f_range_hz": [
+    8,
+    14
+   ],
+   "note": "planetary ring teeth x output speed (ASSUMED tooth counts)"
+  },
+  {
+   "name": "reversal_backlash_impact",
+   "f_hz": 0.556,
+   "note": "2 reversals per 3.6 s cycle; gearbox/hub backlash impacts AND post-in-slot impacts (v2)"
+  },
+  {
+   "name": "post_slot_gap_closure",
+   "f_hz": null,
+   "note": "NEW v2: every start/stop first moves the cart through the slot clearance (1-4 mm across, ~10 cm along!) before the shell can push the post -> impact; along the slot the shell gives NO restraint at all, only the feet velcro"
+  },
+  {
+   "name": "carpet_stick_slip",
+   "f_hz": null,
+   "f_range_hz": [
+    2,
+    30
+   ],
+   "note": "tyre creep/stick on carpet"
+  },
+  {
+   "name": "caster_flip_at_reversal",
+   "f_hz": 0.556,
+   "note": "casters never finish the 180 deg swing in a 0.1-3.4 cm segment -> scrub: ~38 N per caster, up to 1.8 m/s2 lateral kick"
+  },
+  {
+   "name": "longitudinal_load_transfer",
+   "f_hz": null,
+   "detail": {
+    "real": {
+     "a_ms2": 0.65,
+     "dN_N": 15.8,
+     "rear_static_N": 168.5,
+     "rear_frac_change": 0.09,
+     "traction_fwd_accel_N": 110.6,
+     "traction_rev_accel_N": 91.7
+    },
+    "real_hi": {
+     "a_ms2": 0.88,
+     "dN_N": 21.3,
+     "rear_static_N": 168.5,
+     "rear_frac_change": 0.13,
+     "traction_fwd_accel_N": 113.9,
+     "traction_rev_accel_N": 88.3
+    }
+   },
+   "note": "dN=m a h_cm/L, L=0.66 m"
+  },
+  {
+   "name": "try_me_dance_torso_sway",
+   "f_hz": 0.75,
+   "f_range_hz": [
+    0.4,
+    1.5
+   ],
+   "note": "'torso moves side-to-side', 20 s cycle (MEASURED); sits in the sway band; with a pinned/velcro post bottom the dance itself rocks the stack"
+  }
+ ],
+ "forbidden_bands_hz": [
+  [
+   0.3,
+   6.0
+  ],
+  [
+   6.0,
+   30.0
+  ],
+  [
+   150.0,
+   330.0
+  ]
+ ],
+ "forbidden_bands_note": [
+  "0.3-6 Hz: bear-on-post sway (all fixities), stack rocking on velcro, torso pivot, arms -> no un-ramped periodic start/stop; ramp >= 1 s",
+  "6-30 Hz: post-in-slot rattle, cart bounce/pitch, gear mesh, loaded drivetrain ring -> rise times < 80 ms excite the slot impact",
+  "150-330 Hz: stepper rotor mid-band; 250 full steps/s is INSIDE; also drums the hollow shell"
+ ],
+ "cog_height_m": 0.797,
+ "cog_height_note": "bear+post+shell stack CoM above the deck (mid, v2 photo geometry); whole cart CoM above floor = 0.37 m",
+ "base_halfwidth_m": 0.12,
+ "base_halfwidth_note": "ball-on-cradle contact half-width (velcro_only / pinned_gap); fixed case has no rigid-body tip",
+ "tip_accel_ms2": 1.48,
+ "tip_accel_by_case_ms2": {
+  "fixed": 5.28,
+  "pinned_gap": 1.07,
+  "velcro_only": 1.48
+ },
+ "tip_velcro_detail": {
+  "low": {
+   "b_m": 0.08,
+   "a_tip_no_velcro": 1.17,
+   "a_tip_with_velcro_peel": 1.34
+  },
+  "mid": {
+   "b_m": 0.12,
+   "a_tip_no_velcro": 1.48,
+   "a_tip_with_velcro_peel": 2.15
+  },
+  "high": {
+   "b_m": 0.16,
+   "a_tip_no_velcro": 1.71,
+   "a_tip_with_velcro_peel": 2.87
+  }
+ },
+ "tip_accel_whole_cart_ms2": {
+  "longitudinal": 8.71,
+  "transverse": 5.28
+ },
+ "post": {
+  "side_m": 0.022,
+  "wall_m": 0.0012,
+  "EI_Nm2": 1444.6,
+  "M_yield_Nm": 164.2,
+  "a_yield_ms2": 24.1,
+  "slot_clear_across_m": [
+   0.001,
+   0.002,
+   0.004
+  ],
+  "slot_clear_along_m": [
+   0.05,
+   0.1,
+   0.12
+  ]
+ },
+ "jerk_accel_ms2": {
+  "commanded": 11.4,
+  "realistic_low": 0.65,
+  "realistic_high": 0.88
+ },
+ "load_transfer": {
+  "real": {
+   "a_ms2": 0.65,
+   "dN_N": 15.8,
+   "rear_static_N": 168.5,
+   "rear_frac_change": 0.09,
+   "traction_fwd_accel_N": 110.6,
+   "traction_rev_accel_N": 91.7
+  },
+  "real_hi": {
+   "a_ms2": 0.88,
+   "dN_N": 21.3,
+   "rear_static_N": 168.5,
+   "rear_frac_change": 0.13,
+   "traction_fwd_accel_N": 113.9,
+   "traction_rev_accel_N": 88.3
+  }
+ },
+ "cart_pitch_static_rad": 0.00096,
+ "caster": {
+  "kinematic_mode_hz": [
+   0.145,
+   0.181,
+   0.241
+  ],
+  "flip_distance_m": [
+   0.047,
+   0.063,
+   0.079
+  ],
+  "segment_travel_m": [
+   0.001,
+   0.016,
+   0.034
+  ],
+  "scrub_force_per_caster_N": 37.9,
+  "lateral_cart_accel_if_two_casters_scrub_ms2": 1.77
+ },
+ "single_pulse_energy_check": {
+  "velcro_only": {
+   "E_tip_J": 0.798,
+   "KE_pulse_J": 0.0079,
+   "single_pulse_overturns": false
+  }
+ },
+ "resonant_buildup_at_sway_mode": {
+  "per_harmonic_base_accel_ms2": 0.1,
+  "response_by_case": {
+   "fixed": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 0.3,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 0.2,
+     "cycles_to_build": 10
+    }
+   },
+   "pinned_gap": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 1.9,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 1.1,
+     "cycles_to_build": 10
+    }
+   },
+   "velcro_only": {
+    "3%": {
+     "a_rel_ms2": 1.69,
+     "x_cm_at_com_cm": 11.2,
+     "cycles_to_build": 17
+    },
+    "5%": {
+     "a_rel_ms2": 1.0,
+     "x_cm_at_com_cm": 6.6,
+     "cycles_to_build": 10
+    }
+   }
+  }
+ },
+ "stack": {
+  "m_kg": 9.0,
+  "I_base_kgm2": 6.77,
+  "h_bear_com_m": 1.01,
+  "h_cm_m": 0.797
+ },
+ "whole_cart": {
+  "m_kg": 43.0,
+  "h_cm_m": 0.372
+ },
+ "recommended_profile": {
+  "microstep": 16,
+  "ramp_s": 1.0,
+  "ramp_shape": "S-curve (sin^2)",
+  "cruise_full_steps_per_s_max": 250,
+  "min_dwell_s": 2.0,
+  "dwell_jitter": "uniform 2-4 s, never periodic",
+  "no_drive_during_try_me": true,
+  "max_segment_accel_ms2": 0.36,
+  "note": "keep every start/stop acceleration below 1/3 of the worst-case fixity tip accel; FIX THE POST BOTTOM FIRST (fixed case) and shim the slot"
+ }
+}
