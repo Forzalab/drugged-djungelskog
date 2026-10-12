@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <wiringPi.h>
+
+// Define your pins using BCM / Broadcom numbering
+#define STEP1_PIN 13
+#define STEP2_PIN 20 
+#define DIR1_PIN  26
+#define DIR2_PIN  21
+
+// Motor parameters
+#define STEPS_PER_REV 200
+#define STEP_DELAY_US 2000 // Microseconds between steps (controls speed)
+
+int main(void) {
+    // 1. Initialize WiringPi using Broadcom (BCM) pin numbering
+    if (wiringPiSetupGpio() < 0) {
+        fprintf(stderr, "Unable to setup wiringPi\n");
+        return 1;
+    }
+
+    // 2. Set the pins as output
+    pinMode(STEP1_PIN, OUTPUT);
+    pinMode(STEP2_PIN, OUTPUT);
+    pinMode(DIR1_PIN, OUTPUT);
+    pinMode(DIR2_PIN, OUTPUT);
+
+    printf("WiringPi A4988 driver initialized. Press Ctrl+C to stop.\n");
+
+    while (1) {
+        // --- Move Clockwise ---
+        printf("Moving Clockwise...\n");
+        digitalWrite(DIR1_PIN, HIGH); // Set direction
+        digitalWrite(DIR2_PIN, LOW); // Set direction
+        
+        for (int i = 0; i < STEPS_PER_REV; i++) {
+            digitalWrite(STEP2_PIN, HIGH);
+            digitalWrite(STEP1_PIN, HIGH);
+            delayMicroseconds(STEP_DELAY_US);
+            digitalWrite(STEP2_PIN, LOW);
+            digitalWrite(STEP1_PIN, LOW);
+            delayMicroseconds(STEP_DELAY_US);
+        }
+        
+        delay(1000); // Pause for 1 second (1000 milliseconds)
+
+        // --- Move Counter-Clockwise ---
+        printf("Moving Counter-Clockwise...\n");
+        digitalWrite(DIR1_PIN, LOW); // Reverse direction
+        digitalWrite(DIR2_PIN, HIGH); // Reverse direction
+        
+        for (int i = 0; i < STEPS_PER_REV; i++) {
+            digitalWrite(STEP2_PIN, HIGH);
+            digitalWrite(STEP1_PIN, HIGH);
+            delayMicroseconds(STEP_DELAY_US);
+            digitalWrite(STEP2_PIN, LOW);
+            digitalWrite(STEP1_PIN, LOW);
+            delayMicroseconds(STEP_DELAY_US);
+        }
+        
+        delay(1000); // Pause for 1 second
+    }
+}
+

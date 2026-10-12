@@ -1,0 +1,275 @@
+=== INPUT FILES ===
+  masses.json:items                  json
+  masses.json:buffer_kg              json
+  masses.json:geometry               json
+  masses.json:rear_wheel_load_frac_est json
+  modes.json:modes                   json
+  modes.json:excitations             json
+  modes.json:forbidden_bands_hz      json
+  modes.json:cog_height_m            json
+  modes.json:base_halfwidth_m        json
+  modes.json:tip_accel_ms2           json
+
+=== MASS (kg) ===   low / mid / high
+  dolly_GFS-1830_steel   8.79   9.25   9.72  web:https://gorillamade.com/product/gfs-1830/ (20.4 lb, 30.25x18x5.8 in, platform 30x18 in, four 3in casters)
+  wood_deck_plus_carpet   1.50   3.00   4.50  derived: 18x30in plywood 1/2-3/4in @ 500-600 kg/m^3 = 2.2-4.0 kg + carpet ~1.5 kg/m^2 x 0.35 m^2; GUESS thickness
+  drive_motors_wheels_mounts   1.40   1.50   1.80  code:cart_sim.py MASS drive_elec (2x 0.46 kg 17HS15-1684S-PG5 + wheels/brackets)
+  gold_ball_hollow_shell_2_halves_screwed   1.00   1.50   2.50  PHOTO v2: slot shows dark hollow interior; two hemispheres screwed at a seam; textured gold paint over a white substrate (SEEN). Thin shell (plastic/papier-mache/hard-coated foam, UNKNOWN) d=0.47 m -> 1-2.5 kg. Was 1-6 kg solid EPS in v1
+  barnaby_bear_body_hollow_frame   5.00   6.00   7.50  Tony: bear is a hollow grid frame with fur skin; listing 20 lb total (web spirithalloween 266092) minus post/base. Head+jaw motor ~1 kg, torso dance mechanism ~2 kg, frame+fur+arms ~2-3 kg. GUESS split
+  bear_stand_frame_tubular_steel_incl_post   2.50   3.50   5.00  Tony 17:2x + photos a85221c3/0dbb5a76: the post is part of the animatronic's original black round-tube steel stand frame that sits ON the wooden deck, zip-tied (SEEN: 3-4 black ~4.8 mm ties). ~22 mm tube, base ~0.45 x 0.6 m + ~1.1 m post -> 2.5-5 kg GUESS
+  fog_machine      1.40   2.50   4.50  web:https://gearstation.eu/shop/adj-vf400/ (ADJ VF400 4 lb/2 kg); https://www.newegg.com/p/0TC-00FC-00006 (400W 1.36 kg); 1000W class 3.0-4.5 kg (ADJ Dyno-Fog II 10 lb)
+  anker_solix_power_station   4.13  10.90  12.90  web:https://app.footprinthero.com/power-stations/anker-solix/c300 (C300 4.13 kg, 12V car socket 120W); https://www.ankersolix.com/products/C800-plus (C800 Plus 10.9 kg, 12V car out 120W); https://app.footprinthero.com/power-stations/anker-solix/c1000 (C1000 12.9 kg, 12V car socket 120W). Outlier: F2000 30.5 kg https://app.footprinthero.com/power-stations/anker-solix/f2000 (not in range; would add +17.6 kg). Model UNKNOWN
+  raspberry_pi_breadboard_wiring   0.15   0.30   0.60  GUESS: Pi 4 ~46 g + breadboard + drivers + cables/case
+  buffer_X         5.00   5.00   5.00  user: Tony's buffer X kg (parameter, default 5)
+  TOTAL           30.87  43.45  54.02
+  geometry: {'deck_h_m': 0.17, 'deck_h_m_range': [0.155, 0.19], 'ball_d_m': 0.47, 'ball_d_m_range': [0.42, 0.52], 'bear_h_m': 1.2, 'bear_w_m': 0.98, 'bear_d_m': 0.711, 'stack_top_h_m': 1.84, 'bear_feet_h_m': 0.64, 'bear_com_frac_of_height': {'low': 0.35, 'mid': 0.45, 'high': 0.55}, 'cog_h_m_low': 0.47, 'cog_h_m_mid': 0.46, 'cog_h_m_high': 0.5, 'cog_note': 'whole loaded cart v2: lighter, lower stack -> CoG ~0.46-0.50 m above floor', 'bear_on_ball_cog_h_m_low': 0.8, 'bear_on_ball_cog_h_m_mid': 0.72, 'bear_on_ball_cog_h_m_high': 0.85, 'track_m': 0.4, 'track_note': 'GFS-1830 platform 18 in = 0.457 m wide; corner casters inset ~1-1.5 in each side -> ~0.38-0.42 m. Driven wheel track unmeasured.', 'wheelbase_m': 0.66, 'wheelbase_note': 'platform 30 in = 0.762 m; caster centres inset ~2 in each end -> ~0.62-0.70 m. Unmeasured.', 'platform_m': [0.762, 0.457], 'tip_note': 'static tip angle sideways = atan((track/2)/cog_h); lateral accel to tip = g*(track/2)/cog_h. Bear 43 in wide overhangs 18 in deck.', 'ball_d_note': 'PHOTO v2 scale check (sugar box + 3in sticky note rulers): 510 px / 0.034 in/px = 17 in = 0.44-0.50 m (was 0.65 GUESS)', 'bear_h_m_range': [1.1, 1.3], 'bear_h_note': 'PHOTO v2: feet-to-head-top 1350 px -> 46 in = 1.17 m +-0.1 (listing 70 in evidently includes the stand/pole). bear_w_m (arm span in photo) 0.98 m', 'post_side_m': 0.022, 'post_side_m_range': [0.019, 0.028], 'post_note': 'square steel tube, scale-estimated from ball ratio in image 3; 3/4-1 in tube typical of Spirit animatronic stands', 'slot_m': [0.13, 0.026], 'slot_note': 'slot in ball top ~13 cm long x post+~3 mm wide; post sits near one end -> ~10 cm free clearance along slot, ~1-3 mm across (SEEN, scale-estimated)', 'bear_on_ball_cog_note': 'v3: bear body 6 kg at 0.47+0.45x1.2 m, frame 3.5 kg (post half at 0.55 m, base at 0.02 m), shell 1.5 kg at 0.235 m, above the deck', 'frame_base_m': [0.6, 0.45], 'frame_base_range_m': [[0.45, 0.75], [0.4, 0.46]], 'frame_base_note': "v3: frame rail runs along the deck's long edge (SEEN a85221c3), so width ~= deck width 0.45 m; length GUESS 0.45-0.75 m; rocking half-widths b_trans 0.20-0.23, b_long 0.22-0.37", 'frame_deck_gap_m': 0.001, 'frame_gap_note': "Tony: ~1 mm gap between frame and deck/ball bottom (sketch 'gap')", 'zip_ties': {'count_seen': 4, 'count_range': [3, 6], 'width_mm': 4.8, 'rating_lb': 50, 'rating_N': 222, 'source': 'web:https://gexpro.com/p/18693/thomas-betts/cable-tie-standard-116-long-nylon-white-100-pack/786210869896/ty5253m (Ty-Rap 0.19 in = 4.8 mm wide, 50 lb); 18 lb = 2.4 mm class https://www.gexpro.com/p/273604/gardner-bender/cable-tie-4-18-lb/032076461041/46-104 ; 120/175 lb = 7.6/12.7 mm heavy-duty classes (not found online in this pass, typical catalog values)'}}
+
+=== STRUCTURE (modes.json) ===
+  bear_on_post_sway_FIXED_base f 3.14/3.38/4.14 Hz  zeta 0.03
+  bear_on_frame_sway_ZIPTIED_gap f 1.79/2.82/3.64 Hz  zeta 0.04
+  frame_rocking_on_zip_ties f 2.28/6.52/11.21 Hz  zeta 0.06
+  shell_dance_slip_on_post f 0.4/0.75/1.5 Hz  zeta 0.1
+  bear_on_post_sway_PINNED_gap f 0.97/1.51/2.06 Hz  zeta 0.05
+  stack_rocking_VELCRO_only f 0.3/0.61/1.14 Hz  zeta 0.08
+  post_in_slot_rattle_impact f 6/10/25 Hz  zeta 0.1
+  ball_shell_ovalling_seam f 15/30/60 Hz  zeta 0.05
+  cart_bounce_vertical     f 6.35/9.19/14.03 Hz  zeta 0.08
+  cart_pitch_roll_on_casters f 4.45/7.36/12.63 Hz  zeta 0.08
+  cart_horizontal_on_carpet f 3.67/6.37/11.09 Hz  zeta 0.1
+  drivetrain_loaded_stepper_spring f 13.46/16.87/23.17 Hz  zeta 0.03
+  stepper_rotor_midband_resonance f 180.38/236.17/303.1 Hz  zeta 0.02
+  arm_cantilever_hollow_frame f 1.5/3.5/7 Hz  zeta 0.06
+  head_on_neck             f 2.5/4.5/8 Hz  zeta 0.06
+  torso_on_dance_pivot     f 0.5/1.2/2.5 Hz  zeta 0.05
+  caster_swivel_kinematic_trail f 0.14/0.18/0.24 Hz  zeta 0.5
+  caster_swivel_rattle_play f 8/15/30 Hz  zeta 0.08
+  cart_pitch_load_transfer f 4/7/12 Hz  zeta 0.08
+  forbidden bands: [(0.3, 6.0), (6.0, 30.0), (150.0, 330.0)]
+  excitations listed by modes.json: [{'name': 'segment_pattern_fundamental', 'f_hz': 0.278, 'harmonics_hz': [0.28, 0.56, 0.83, 1.11, 1.39, 1.67, 1.94, 2.22, 2.5, 2.78, 3.06, 3.33, 3.61, 3.89, 4.17, 4.44, 4.72, 5.0, 5.28, 5.56, 5.83, 6.11, 6.39, 6.67], 'note': '0.8 s on / 1 s pause / 0.8 s reverse / 1 s pause; velocity-step impulses -> flat comb to >10 Hz without a ramp', 'comb': [{'n': 1, 'f_hz': 0.278, 'a_amp_ms2_noramp': 0.065, 'a_amp_ms2_ramp1s': 0.0571}, {'n': 2, 'f_hz': 0.556, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 3, 'f_hz': 0.833, 'a_amp_ms2_noramp': 0.0876, 'a_amp_ms2_ramp1s': 0.0167}, {'n': 4, 'f_hz': 1.111, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 5, 'f_hz': 1.389, 'a_amp_ms2_noramp': 0.0346, 'a_amp_ms2_ramp1s': 0.0074}, {'n': 6, 'f_hz': 1.667, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 7, 'f_hz': 1.944, 'a_amp_ms2_noramp': 0.0996, 'a_amp_ms2_ramp1s': 0.0028}, {'n': 8, 'f_hz': 2.222, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 9, 'f_hz': 2.5, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 10, 'f_hz': 2.778, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 11, 'f_hz': 3.056, 'a_amp_ms2_noramp': 0.0996, 'a_amp_ms2_ramp1s': 0.0018}, {'n': 12, 'f_hz': 3.333, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 13, 'f_hz': 3.611, 'a_amp_ms2_noramp': 0.0346, 'a_amp_ms2_ramp1s': 0.0029}, {'n': 14, 'f_hz': 3.889, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 15, 'f_hz': 4.167, 'a_amp_ms2_noramp': 0.0876, 'a_amp_ms2_ramp1s': 0.0033}, {'n': 16, 'f_hz': 4.444, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 17, 'f_hz': 4.722, 'a_amp_ms2_noramp': 0.065, 'a_amp_ms2_ramp1s': 0.0034}, {'n': 18, 'f_hz': 5.0, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 19, 'f_hz': 5.278, 'a_amp_ms2_noramp': 0.065, 'a_amp_ms2_ramp1s': 0.003}, {'n': 20, 'f_hz': 5.556, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 21, 'f_hz': 5.833, 'a_amp_ms2_noramp': 0.0876, 'a_amp_ms2_ramp1s': 0.0024}, {'n': 22, 'f_hz': 6.111, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}, {'n': 23, 'f_hz': 6.389, 'a_amp_ms2_noramp': 0.0346, 'a_amp_ms2_ramp1s': 0.0016}, {'n': 24, 'f_hz': 6.667, 'a_amp_ms2_noramp': 0.0, 'a_amp_ms2_ramp1s': 0.0}]}, {'name': 'start_stop_jerk', 'f_hz': None, 'a_cmd_ms2': 11.4, 'a_real_ms2': [0.6, 0.82], 'note': 'commanded: full speed in one 4 ms step; real: torque/traction-limited (mid masses v2)'}, {'name': 'full_step_rate', 'f_hz': 250.0, 'harmonics_hz': [250, 500, 750, 1000], 'note': '1.8 deg/step; torque ripple; buzz; drums the hollow shell'}, {'name': 'stepper_midband_overlap', 'f_hz': 250.0, 'note': "250 steps/s inside the rotor's 170-330 Hz resonance band"}, {'name': 'gearbox_mesh', 'f_hz': 11.1, 'f_range_hz': [8, 14], 'note': 'planetary ring teeth x output speed (ASSUMED tooth counts)'}, {'name': 'reversal_backlash_impact', 'f_hz': 0.556, 'note': '2 reversals per 3.6 s cycle; gearbox/hub backlash impacts AND post-in-slot impacts (v2)'}, {'name': 'post_slot_gap_closure', 'f_hz': None, 'note': 'NEW v2: every start/stop first moves the cart through the slot clearance (1-4 mm across, ~10 cm along!) before the shell can push the post -> impact; along the slot the shell gives NO restraint at all, only the feet velcro'}, {'name': 'carpet_stick_slip', 'f_hz': None, 'f_range_hz': [2, 30], 'note': 'tyre creep/stick on carpet'}, {'name': 'caster_flip_at_reversal', 'f_hz': 0.556, 'note': 'casters never finish the 180 deg swing in a 0.1-3.4 cm segment -> scrub: ~40 N per caster, up to 1.8 m/s2 lateral kick'}, {'name': 'longitudinal_load_transfer', 'f_hz': None, 'detail': {'real': {'a_ms2': 0.6, 'dN_N': 14.9, 'rear_static_N': 176.4, 'rear_frac_change': 0.08, 'traction_fwd_accel_N': 114.8, 'traction_rev_accel_N': 96.9}, 'real_hi': {'a_ms2': 0.82, 'dN_N': 20.3, 'rear_static_N': 176.4, 'rear_frac_change': 0.12, 'traction_fwd_accel_N': 118.0, 'traction_rev_accel_N': 93.6}}, 'note': 'dN=m a h_cm/L, L=0.66 m'}, {'name': 'try_me_dance_shell_on_post', 'f_hz': 0.75, 'f_range_hz': [0.4, 1.5], 'note': 'v3 INTERNAL excitation: the fur shell (+ball via feet velcro) sways on the FIXED post, 20 s cycle (MEASURED), rate ASSUMED; reaction force 0.4-28.4 N at ~1 m -> 0.5-33.8 N m on the frame, 0.077 m/s2 on the cart; post hits the slot edges twice per sway (1-3 Hz impacts)'}]
+  stack CoM 0.659 m, base half-width 0.22 m, tip accel 3.28
+
+=== EXCITATION SPECTRUM (mid mass; simulated cart accel, 1 cycle; dominant peaks, rel. amplitude) ===
+  a: main.cc instant (250 steps/s)
+    commanded (step-quantized): 999.75 Hz 100%, 750.25 Hz 75%, 500.25 Hz 50%, 250.25 Hz 25%
+    simulated cart accel:       60.73 Hz 100%, 63.55 Hz 96%, 189.32 Hz 47%, 313.22 Hz 27%, 121.27 Hz 24%, 58.67 Hz 22%
+    share of accel energy inside forbidden bands: 20.6%
+    forbidden-band hits: 189.32 Hz (47%) in forbidden 150-330 Hz; 313.22 Hz (27%) in forbidden 150-330 Hz
+  b: trapezoid ramp (0.3 s ramp)
+    commanded (step-quantized): 999.75 Hz 100%, 750.25 Hz 74%, 500.25 Hz 45%, 249.75 Hz 24%, 936.45 Hz 17%, 822.65 Hz 15%
+    simulated cart accel:       62.94 Hz 100%, 249.82 Hz 51%, 187.00 Hz 49%, 0.61 Hz 38%, 2.02 Hz 34%, 1.64 Hz 31%
+    share of accel energy inside forbidden bands: 37.2%
+    forbidden-band hits: 249.82 Hz (51%) in forbidden 150-330 Hz; 187.00 Hz (49%) in forbidden 150-330 Hz; 0.61 Hz (38%) in forbidden 0.3-6 Hz; 2.02 Hz (34%) in forbidden 0.3-6 Hz; 1.64 Hz (31%) in forbidden 0.3-6 Hz
+  c: slower instant (125 steps/s)
+    commanded (step-quantized): 999.85 Hz 100%, 875.15 Hz 88%, 750.15 Hz 75%, 625.15 Hz 63%, 500.15 Hz 50%, 375.15 Hz 38%
+    simulated cart accel:       25.06 Hz 100%, 32.04 Hz 92%, 100.02 Hz 44%, 93.00 Hz 42%, 50.05 Hz 34%, 157.01 Hz 32%
+    share of accel energy inside forbidden bands: 43.8%
+    forbidden-band hits: 25.06 Hz (100%) in forbidden 6-30 Hz; 157.01 Hz (32%) in forbidden 150-330 Hz
+
+=== STRUCTURAL RESPONSE (mid mass; base accel = simulated cart accel) ===
+  profile                mode                          f  z_pk mm a_pk m/s2    DAF
+  a: main.cc instant     bear_on_post_sway_FIXED_base   3.14    0.269     0.107   0.25
+  a: main.cc instant     bear_on_post_sway_FIXED_base   3.38    0.274     0.126   0.29
+  a: main.cc instant     bear_on_post_sway_FIXED_base   4.14    0.291     0.197   0.46
+  a: main.cc instant     bear_on_frame_sway_ZIPTIED_gap   1.79    0.403     0.051   0.12
+  a: main.cc instant     bear_on_frame_sway_ZIPTIED_gap   2.82    0.281     0.092   0.21
+  a: main.cc instant     bear_on_frame_sway_ZIPTIED_gap   3.64    0.287     0.155   0.36
+  a: main.cc instant     frame_rocking_on_zip_ties   2.28    0.265     0.063   0.15
+  a: main.cc instant     frame_rocking_on_zip_ties   6.52    0.255     0.431   1.00
+  a: main.cc instant     frame_rocking_on_zip_ties  11.21    0.233     1.166   2.71
+  a: main.cc instant     shell_dance_slip_on_post   0.40    0.453     0.009   0.02
+  a: main.cc instant     shell_dance_slip_on_post   0.75    0.556     0.019   0.04
+  a: main.cc instant     shell_dance_slip_on_post   1.50    0.315     0.045   0.10
+  a: main.cc instant     bear_on_post_sway_PINNED_gap   0.97    0.293     0.014   0.03
+  a: main.cc instant     bear_on_post_sway_PINNED_gap   1.51    0.331     0.036   0.08
+  a: main.cc instant     bear_on_post_sway_PINNED_gap   2.06    0.266     0.051   0.12
+  a: main.cc instant     stack_rocking_VELCRO_only   0.30    0.548     0.006   0.01
+  a: main.cc instant     stack_rocking_VELCRO_only   0.61    0.647     0.011   0.03
+  a: main.cc instant     stack_rocking_VELCRO_only   1.14    0.276     0.025   0.06
+  a: main.cc instant     post_in_slot_rattle_impact   6.00    0.228     0.348   0.81
+  a: main.cc instant     post_in_slot_rattle_impact  10.00    0.215     0.868   2.02
+  a: main.cc instant     post_in_slot_rattle_impact  25.00    0.099     2.496   5.80
+  a: main.cc instant     ball_shell_ovalling_seam  15.00    0.211     1.881   4.37
+  a: main.cc instant     ball_shell_ovalling_seam  30.00    0.070     2.514   5.84
+  a: main.cc instant     ball_shell_ovalling_seam  60.00    0.063     8.991  20.89
+  a: main.cc instant     cart_bounce_vertical       6.35    0.241     0.388   0.90
+  a: main.cc instant     cart_bounce_vertical       9.19    0.231     0.781   1.81
+  a: main.cc instant     cart_bounce_vertical      14.03    0.202     1.587   3.69
+  a: main.cc instant     cart_pitch_roll_on_casters   4.45    0.255     0.216   0.50
+  a: main.cc instant     cart_pitch_roll_on_casters   7.36    0.237     0.514   1.19
+  a: main.cc instant     cart_pitch_roll_on_casters  12.63    0.212     1.351   3.14
+  a: main.cc instant     cart_horizontal_on_carpet   3.67    0.270     0.168   0.39
+  a: main.cc instant     cart_horizontal_on_carpet   6.37    0.228     0.380   0.88
+  a: main.cc instant     cart_horizontal_on_carpet  11.09    0.210     1.040   2.42
+  a: main.cc instant     drivetrain_loaded_stepper_spring  13.46    0.236     1.692   3.93
+  a: main.cc instant     drivetrain_loaded_stepper_spring  16.87    0.204     2.291   5.32
+  a: main.cc instant     drivetrain_loaded_stepper_spring  23.17    0.136     2.884   6.70
+  a: main.cc instant     stepper_rotor_midband_resonance 180.38    0.005     5.993  13.93
+  a: main.cc instant     stepper_rotor_midband_resonance 236.17    0.001     3.185   7.40
+  a: main.cc instant     stepper_rotor_midband_resonance 303.10    0.001     5.350  12.43
+  a: main.cc instant     arm_cantilever_hollow_frame   1.50    0.327     0.037   0.09
+  a: main.cc instant     arm_cantilever_hollow_frame   3.50    0.276     0.143   0.33
+  a: main.cc instant     arm_cantilever_hollow_frame   7.00    0.250     0.488   1.13
+  a: main.cc instant     head_on_neck               2.50    0.274     0.077   0.18
+  a: main.cc instant     head_on_neck               4.50    0.256     0.215   0.50
+  a: main.cc instant     head_on_neck               8.00    0.249     0.634   1.47
+  a: main.cc instant     torso_on_dance_pivot       0.50    0.586     0.007   0.02
+  a: main.cc instant     torso_on_dance_pivot       1.20    0.290     0.022   0.05
+  a: main.cc instant     torso_on_dance_pivot       2.50    0.275     0.074   0.17
+  a: main.cc instant     caster_swivel_kinematic_trail   0.14    0.579     0.013   0.03
+  a: main.cc instant     caster_swivel_kinematic_trail   0.18    0.540     0.016   0.04
+  a: main.cc instant     caster_swivel_kinematic_trail   0.24    0.486     0.021   0.05
+  a: main.cc instant     caster_swivel_rattle_play   8.00    0.236     0.603   1.40
+  a: main.cc instant     caster_swivel_rattle_play  15.00    0.194     1.745   4.06
+  a: main.cc instant     caster_swivel_rattle_play  30.00    0.067     2.417   5.62
+  a: main.cc instant     cart_pitch_load_transfer   4.00    0.272     0.189   0.44
+  a: main.cc instant     cart_pitch_load_transfer   7.00    0.238     0.466   1.08
+  a: main.cc instant     cart_pitch_load_transfer  12.00    0.216     1.243   2.89
+  b: trapezoid ramp      bear_on_post_sway_FIXED_base   3.14    2.132     0.831   1.85
+  b: trapezoid ramp      bear_on_post_sway_FIXED_base   3.38    1.914     0.867   1.93
+  b: trapezoid ramp      bear_on_post_sway_FIXED_base   4.14    1.279     0.868   1.93
+  b: trapezoid ramp      bear_on_frame_sway_ZIPTIED_gap   1.79    3.305     0.422   0.94
+  b: trapezoid ramp      bear_on_frame_sway_ZIPTIED_gap   2.82    2.378     0.752   1.67
+  b: trapezoid ramp      bear_on_frame_sway_ZIPTIED_gap   3.64    1.634     0.859   1.91
+  b: trapezoid ramp      frame_rocking_on_zip_ties   2.28    2.730     0.567   1.26
+  b: trapezoid ramp      frame_rocking_on_zip_ties   6.52    0.754     1.281   2.85
+  b: trapezoid ramp      frame_rocking_on_zip_ties  11.21    0.355     1.772   3.94
+  b: trapezoid ramp      shell_dance_slip_on_post   0.40   19.966     0.129   0.29
+  b: trapezoid ramp      shell_dance_slip_on_post   0.75   11.750     0.266   0.59
+  b: trapezoid ramp      shell_dance_slip_on_post   1.50    3.158     0.287   0.64
+  b: trapezoid ramp      bear_on_post_sway_PINNED_gap   0.97    9.042     0.341   0.76
+  b: trapezoid ramp      bear_on_post_sway_PINNED_gap   1.51    4.044     0.367   0.81
+  b: trapezoid ramp      bear_on_post_sway_PINNED_gap   2.06    3.205     0.541   1.20
+  b: trapezoid ramp      stack_rocking_VELCRO_only   0.30   25.363     0.091   0.20
+  b: trapezoid ramp      stack_rocking_VELCRO_only   0.61   18.812     0.280   0.62
+  b: trapezoid ramp      stack_rocking_VELCRO_only   1.14    5.707     0.298   0.66
+  b: trapezoid ramp      post_in_slot_rattle_impact   6.00    0.720     1.061   2.36
+  b: trapezoid ramp      post_in_slot_rattle_impact  10.00    0.433     1.733   3.85
+  b: trapezoid ramp      post_in_slot_rattle_impact  25.00    0.104     2.617   5.82
+  b: trapezoid ramp      ball_shell_ovalling_seam  15.00    0.254     2.265   5.03
+  b: trapezoid ramp      ball_shell_ovalling_seam  30.00    0.093     3.320   7.38
+  b: trapezoid ramp      ball_shell_ovalling_seam  60.00    0.053     7.509  16.69
+  b: trapezoid ramp      cart_bounce_vertical       6.35    0.730     1.188   2.64
+  b: trapezoid ramp      cart_bounce_vertical       9.19    0.524     1.781   3.96
+  b: trapezoid ramp      cart_bounce_vertical      14.03    0.251     1.981   4.40
+  b: trapezoid ramp      cart_pitch_roll_on_casters   4.45    1.022     0.813   1.81
+  b: trapezoid ramp      cart_pitch_roll_on_casters   7.36    0.677     1.465   3.26
+  b: trapezoid ramp      cart_pitch_roll_on_casters  12.63    0.276     1.747   3.88
+  b: trapezoid ramp      cart_horizontal_on_carpet   3.67    1.424     0.787   1.75
+  b: trapezoid ramp      cart_horizontal_on_carpet   6.37    0.706     1.161   2.58
+  b: trapezoid ramp      cart_horizontal_on_carpet  11.09    0.348     1.713   3.81
+  b: trapezoid ramp      drivetrain_loaded_stepper_spring  13.46    0.272     1.946   4.32
+  b: trapezoid ramp      drivetrain_loaded_stepper_spring  16.87    0.199     2.244   4.99
+  b: trapezoid ramp      drivetrain_loaded_stepper_spring  23.17    0.157     3.329   7.40
+  b: trapezoid ramp      stepper_rotor_midband_resonance 180.38    0.006     8.172  18.16
+  b: trapezoid ramp      stepper_rotor_midband_resonance 236.17    0.004     8.342  18.54
+  b: trapezoid ramp      stepper_rotor_midband_resonance 303.10    0.002     5.622  12.49
+  b: trapezoid ramp      arm_cantilever_hollow_frame   1.50    3.749     0.336   0.75
+  b: trapezoid ramp      arm_cantilever_hollow_frame   3.50    1.679     0.815   1.81
+  b: trapezoid ramp      arm_cantilever_hollow_frame   7.00    0.734     1.426   3.17
+  b: trapezoid ramp      head_on_neck               2.50    2.539     0.634   1.41
+  b: trapezoid ramp      head_on_neck               4.50    1.019     0.820   1.82
+  b: trapezoid ramp      head_on_neck               8.00    0.662     1.689   3.75
+  b: trapezoid ramp      torso_on_dance_pivot       0.50   22.152     0.220   0.49
+  b: trapezoid ramp      torso_on_dance_pivot       1.20    5.123     0.292   0.65
+  b: trapezoid ramp      torso_on_dance_pivot       2.50    2.611     0.648   1.44
+  b: trapezoid ramp      caster_swivel_kinematic_trail   0.14   23.094     0.042   0.09
+  b: trapezoid ramp      caster_swivel_kinematic_trail   0.18   20.087     0.053   0.12
+  b: trapezoid ramp      caster_swivel_kinematic_trail   0.24   15.981     0.068   0.15
+  b: trapezoid ramp      caster_swivel_rattle_play   8.00    0.633     1.628   3.62
+  b: trapezoid ramp      caster_swivel_rattle_play  15.00    0.238     2.144   4.76
+  b: trapezoid ramp      caster_swivel_rattle_play  30.00    0.076     2.731   6.07
+  b: trapezoid ramp      cart_pitch_load_transfer   4.00    1.270     0.817   1.82
+  b: trapezoid ramp      cart_pitch_load_transfer   7.00    0.701     1.365   3.03
+  b: trapezoid ramp      cart_pitch_load_transfer  12.00    0.300     1.720   3.82
+  c: slower instant      bear_on_post_sway_FIXED_base   3.14    0.202     0.080   0.18
+  c: slower instant      bear_on_post_sway_FIXED_base   3.38    0.217     0.098   0.22
+  c: slower instant      bear_on_post_sway_FIXED_base   4.14    0.149     0.103   0.23
+  c: slower instant      bear_on_frame_sway_ZIPTIED_gap   1.79    0.263     0.036   0.08
+  c: slower instant      bear_on_frame_sway_ZIPTIED_gap   2.82    0.240     0.076   0.17
+  c: slower instant      bear_on_frame_sway_ZIPTIED_gap   3.64    0.183     0.099   0.22
+  c: slower instant      frame_rocking_on_zip_ties   2.28    0.288     0.060   0.13
+  c: slower instant      frame_rocking_on_zip_ties   6.52    0.127     0.221   0.50
+  c: slower instant      frame_rocking_on_zip_ties  11.21    0.095     0.478   1.08
+  c: slower instant      shell_dance_slip_on_post   0.40    2.326     0.015   0.03
+  c: slower instant      shell_dance_slip_on_post   0.75    0.744     0.021   0.05
+  c: slower instant      shell_dance_slip_on_post   1.50    0.415     0.042   0.10
+  c: slower instant      bear_on_post_sway_PINNED_gap   0.97    0.864     0.032   0.07
+  c: slower instant      bear_on_post_sway_PINNED_gap   1.51    0.545     0.049   0.11
+  c: slower instant      bear_on_post_sway_PINNED_gap   2.06    0.299     0.050   0.11
+  c: slower instant      stack_rocking_VELCRO_only   0.30    3.353     0.012   0.03
+  c: slower instant      stack_rocking_VELCRO_only   0.61    0.936     0.017   0.04
+  c: slower instant      stack_rocking_VELCRO_only   1.14    0.493     0.031   0.07
+  c: slower instant      post_in_slot_rattle_impact   6.00    0.122     0.189   0.43
+  c: slower instant      post_in_slot_rattle_impact  10.00    0.097     0.405   0.92
+  c: slower instant      post_in_slot_rattle_impact  25.00    0.174     4.389   9.93
+  c: slower instant      ball_shell_ovalling_seam  15.00    0.103     0.927   2.10
+  c: slower instant      ball_shell_ovalling_seam  30.00    0.154     5.490  12.42
+  c: slower instant      ball_shell_ovalling_seam  60.00    0.020     2.925   6.62
+  c: slower instant      cart_bounce_vertical       6.35    0.124     0.207   0.47
+  c: slower instant      cart_bounce_vertical       9.19    0.104     0.360   0.81
+  c: slower instant      cart_bounce_vertical      14.03    0.092     0.734   1.66
+  c: slower instant      cart_pitch_roll_on_casters   4.45    0.139     0.123   0.28
+  c: slower instant      cart_pitch_roll_on_casters   7.36    0.117     0.260   0.59
+  c: slower instant      cart_pitch_roll_on_casters  12.63    0.085     0.554   1.25
+  c: slower instant      cart_horizontal_on_carpet   3.67    0.163     0.105   0.24
+  c: slower instant      cart_horizontal_on_carpet   6.37    0.121     0.210   0.47
+  c: slower instant      cart_horizontal_on_carpet  11.09    0.091     0.466   1.05
+  c: slower instant      drivetrain_loaded_stepper_spring  13.46    0.101     0.723   1.64
+  c: slower instant      drivetrain_loaded_stepper_spring  16.87    0.113     1.275   2.88
+  c: slower instant      drivetrain_loaded_stepper_spring  23.17    0.237     5.039  11.40
+  c: slower instant      stepper_rotor_midband_resonance 180.38    0.004     4.604  10.41
+  c: slower instant      stepper_rotor_midband_resonance 236.17    0.002     4.329   9.79
+  c: slower instant      stepper_rotor_midband_resonance 303.10    0.001     3.727   8.43
+  c: slower instant      arm_cantilever_hollow_frame   1.50    0.507     0.045   0.10
+  c: slower instant      arm_cantilever_hollow_frame   3.50    0.191     0.101   0.23
+  c: slower instant      arm_cantilever_hollow_frame   7.00    0.118     0.235   0.53
+  c: slower instant      head_on_neck               2.50    0.242     0.067   0.15
+  c: slower instant      head_on_neck               4.50    0.144     0.123   0.28
+  c: slower instant      head_on_neck               8.00    0.113     0.290   0.66
+  c: slower instant      torso_on_dance_pivot       0.50    1.346     0.015   0.03
+  c: slower instant      torso_on_dance_pivot       1.20    0.525     0.033   0.07
+  c: slower instant      torso_on_dance_pivot       2.50    0.248     0.067   0.15
+  c: slower instant      caster_swivel_kinematic_trail   0.14    2.220     0.008   0.02
+  c: slower instant      caster_swivel_kinematic_trail   0.18    1.732     0.011   0.02
+  c: slower instant      caster_swivel_kinematic_trail   0.24    1.437     0.014   0.03
+  c: slower instant      caster_swivel_rattle_play   8.00    0.111     0.292   0.66
+  c: slower instant      caster_swivel_rattle_play  15.00    0.096     0.878   1.98
+  c: slower instant      caster_swivel_rattle_play  30.00    0.114     4.133   9.35
+  c: slower instant      cart_pitch_load_transfer   4.00    0.147     0.107   0.24
+  c: slower instant      cart_pitch_load_transfer   7.00    0.117     0.238   0.54
+  c: slower instant      cart_pitch_load_transfer  12.00    0.088     0.518   1.17
+  DAF = mode peak absolute accel / peak cart accel low-passed at 10 Hz
+
+=== PROFILE COMPARISON (all masses; casters + load transfer on) ===
+  profile              mass    kg  rear fwd cm rev cm   cmd  a_LP  a_str worst mode                  tipX latPk  tipY Nrear range
+  a: main.cc instant   low   30.9  0.25   0.01   3.39  3.64  0.59   9.98 stepper_rotor_midband_resonance @180.38  1.76  0.01 294.73  0.19-0.41
+  a: main.cc instant   mid   43.5  0.40   0.00   0.08  3.64  0.43   8.99 ball_shell_ovalling_seam @60  3.78  0.02 155.02  0.35-0.49
+  a: main.cc instant   high  54.0  0.50   0.00   0.06  3.64  0.36   6.24 ball_shell_ovalling_seam @60  6.83  0.01 141.13  0.46-0.55
+  b: trapezoid ramp    low   30.9  0.25   1.09   3.32  3.64  0.34  11.80 stepper_rotor_midband_resonance @236.17  3.02  1.16  1.35  0.20-0.32
+  b: trapezoid ramp    mid   43.5  0.40   0.46   3.52  3.64  0.45   8.34 stepper_rotor_midband_resonance @236.17  1.84  0.48  5.34  0.27-0.49
+  b: trapezoid ramp    high  54.0  0.50   0.02   3.55  3.64  0.16   6.56 stepper_rotor_midband_resonance @236.17  5.89  0.02 189.89  0.45-0.56
+  c: slower instant    low   30.9  0.25   0.90   3.18  3.64  0.71   4.70 stepper_rotor_midband_resonance @236.17  1.93  0.96  2.36  0.17-0.39
+  c: slower instant    mid   43.5  0.40   0.00   0.63  3.64  0.44   5.49 ball_shell_ovalling_seam @30  7.42  0.00 443.78  0.34-0.48
+  c: slower instant    high  54.0  0.50   0.00   0.25  3.64  0.37   5.05 ball_shell_ovalling_seam @30  8.98  0.00 1809.17  0.46-0.56
+  fwd/rev = travel of segment 1 / segment 2 (v1 slip model + caster swivel + load transfer); cmd = commanded
+  a_LP = cart accel low-passed 10 Hz; a_str = worst mode absolute accel (fore-aft);
+  tipX/tipY = a_tip / max(a_LP, modes <= 10 Hz) fore-aft / lateral (<1 tips); latPk = caster swivel lateral kick (m/s^2);
+  a_tip = 3.28 m/s^2; Nrear range = dynamic share of weight on rear wheels
+
+=== CASTER SWIVEL (mid mass) ===
+  a: main.cc instant   reversal rate 0.556 Hz, swivel pulse 0.07 s (~7.25 Hz), lateral kick 0.02 m/s^2, worst lateral mode drivetrain_loaded_stepper_spring @23.17 Hz 0.03 m/s^2
+    lateral flags: reversal x1 = 0.56 Hz in 0.3-6; reversal x2 = 1.11 Hz in 0.3-6; reversal x3 = 1.67 Hz in 0.3-6; reversal x4 = 2.22 Hz in 0.3-6; reversal x5 = 2.78 Hz in 0.3-6; swivel pulse 7.25 Hz in 6-30
+  b: trapezoid ramp    reversal rate 0.476 Hz, swivel pulse 0.25 s (~1.98 Hz), lateral kick 0.48 m/s^2, worst lateral mode ball_shell_ovalling_seam @60 Hz 2.08 m/s^2
+    lateral flags: reversal x1 = 0.48 Hz in 0.3-6; reversal x2 = 0.95 Hz in 0.3-6; reversal x3 = 1.43 Hz in 0.3-6; reversal x4 = 1.90 Hz in 0.3-6; reversal x5 = 2.38 Hz in 0.3-6; swivel pulse 1.98 Hz in 0.3-6
+  c: slower instant    reversal rate 0.385 Hz, swivel pulse 0.07 s (~6.94 Hz), lateral kick 0.00 m/s^2, worst lateral mode ball_shell_ovalling_seam @30 Hz 0.01 m/s^2
+    lateral flags: reversal x1 = 0.38 Hz in 0.3-6; reversal x2 = 0.77 Hz in 0.3-6; reversal x3 = 1.15 Hz in 0.3-6; reversal x4 = 1.54 Hz in 0.3-6; reversal x5 = 1.92 Hz in 0.3-6; swivel pulse 6.94 Hz in 6-30
+
+=== REAR LOAD SWEEP (mid mass; static rear_load_frac, load transfer on) ===
+  profile                        0.3           0.4           0.5           0.6           0.7
+                          fwd/rev cm    fwd/rev cm    fwd/rev cm    fwd/rev cm    fwd/rev cm
+  a: main.cc instant      0.00/ 0.09    0.00/ 0.08    0.00/ 0.07    0.00/ 0.06    0.00/ 0.06
+  b: trapezoid ramp       0.04/ 3.47    0.46/ 3.52    0.92/ 3.55    1.18/ 3.57    1.63/ 3.58
+  c: slower instant       0.00/ 0.70    0.00/ 0.63    0.00/ 0.52    0.01/ 0.47    0.01/ 0.40
+  commanded 3.64 cm per segment; traction = mu*N_rear, drive accelerates total mass
+
+  plots -> /tmp/claude-0/-home-user-evil-autonomous-bear-proj/468097e5-5d8f-55f3-bc75-c9c01fb74eaf/scratchpad/cart-sim/cart_sim_v2.png, /tmp/claude-0/-home-user-evil-autonomous-bear-proj/468097e5-5d8f-55f3-bc75-c9c01fb74eaf/scratchpad/cart-sim/spectrum.png

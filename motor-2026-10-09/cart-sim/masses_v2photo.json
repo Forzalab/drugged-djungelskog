@@ -1,0 +1,160 @@
+{
+ "units": "kg, m",
+ "items": [
+  {
+   "name": "dolly_GFS-1830_steel",
+   "kg_low": 8.79,
+   "kg_mid": 9.25,
+   "kg_high": 9.72,
+   "source": "web:https://gorillamade.com/product/gfs-1830/ (20.4 lb, 30.25x18x5.8 in, platform 30x18 in, four 3in casters)"
+  },
+  {
+   "name": "wood_deck_plus_carpet",
+   "kg_low": 1.5,
+   "kg_mid": 3.0,
+   "kg_high": 4.5,
+   "source": "derived: 18x30in plywood 1/2-3/4in @ 500-600 kg/m^3 = 2.2-4.0 kg + carpet ~1.5 kg/m^2 x 0.35 m^2; GUESS thickness"
+  },
+  {
+   "name": "drive_motors_wheels_mounts",
+   "kg_low": 1.4,
+   "kg_mid": 1.5,
+   "kg_high": 1.8,
+   "source": "code:cart_sim.py MASS drive_elec (2x 0.46 kg 17HS15-1684S-PG5 + wheels/brackets)"
+  },
+  {
+   "name": "gold_ball_hollow_shell_2_halves_screwed",
+   "kg_low": 1.0,
+   "kg_mid": 1.5,
+   "kg_high": 2.5,
+   "source": "PHOTO v2: slot shows dark hollow interior; two hemispheres screwed at a seam; textured gold paint over a white substrate (SEEN). Thin shell (plastic/papier-mache/hard-coated foam, UNKNOWN) d=0.47 m -> 1-2.5 kg. Was 1-6 kg solid EPS in v1"
+  },
+  {
+   "name": "barnaby_bear_body_hollow_frame",
+   "kg_low": 5.0,
+   "kg_mid": 6.0,
+   "kg_high": 7.5,
+   "source": "Tony: bear is a hollow grid frame with fur skin; listing 20 lb total (web spirithalloween 266092) minus post/base. Head+jaw motor ~1 kg, torso dance mechanism ~2 kg, frame+fur+arms ~2-3 kg. GUESS split"
+  },
+  {
+   "name": "bear_steel_post_spine_telescoping",
+   "kg_low": 1.0,
+   "kg_mid": 1.5,
+   "kg_high": 2.0,
+   "source": "PHOTO v2: black square steel tube ~22 mm (SEEN, scale-estimated), wing-nut telescoping lock at ball top (INFERRED), ~1.1-1.3 m long -> 1.1 kg/m"
+  },
+  {
+   "name": "bear_base_plate_if_present",
+   "kg_low": 0.0,
+   "kg_mid": 1.5,
+   "kg_high": 2.5,
+   "source": "UNKNOWN whether the animatronic's original steel base plate is under the ball (sketch: 'velcro' + 'gap' at bottom). low=0 (post ends in nothing)"
+  },
+  {
+   "name": "fog_machine",
+   "kg_low": 1.4,
+   "kg_mid": 2.5,
+   "kg_high": 4.5,
+   "source": "web:https://gearstation.eu/shop/adj-vf400/ (ADJ VF400 4 lb/2 kg); https://www.newegg.com/p/0TC-00FC-00006 (400W 1.36 kg); 1000W class 3.0-4.5 kg (ADJ Dyno-Fog II 10 lb)"
+  },
+  {
+   "name": "anker_solix_power_station",
+   "kg_low": 4.13,
+   "kg_mid": 10.9,
+   "kg_high": 12.9,
+   "source": "web:https://app.footprinthero.com/power-stations/anker-solix/c300 (C300 4.13 kg, 12V car socket 120W); https://www.ankersolix.com/products/C800-plus (C800 Plus 10.9 kg, 12V car out 120W); https://app.footprinthero.com/power-stations/anker-solix/c1000 (C1000 12.9 kg, 12V car socket 120W). Outlier: F2000 30.5 kg https://app.footprinthero.com/power-stations/anker-solix/f2000 (not in range; would add +17.6 kg). Model UNKNOWN"
+  },
+  {
+   "name": "raspberry_pi_breadboard_wiring",
+   "kg_low": 0.15,
+   "kg_mid": 0.3,
+   "kg_high": 0.6,
+   "source": "GUESS: Pi 4 ~46 g + breadboard + drivers + cables/case"
+  },
+  {
+   "name": "buffer_X",
+   "kg_low": 5.0,
+   "kg_mid": 5.0,
+   "kg_high": 5.0,
+   "source": "user: Tony's buffer X kg (parameter, default 5)"
+  }
+ ],
+ "buffer_kg": 5.0,
+ "total_kg_low": 29.4,
+ "total_kg_mid": 43.0,
+ "total_kg_high": 53.5,
+ "total_kg_without_buffer_mid": 38.0,
+ "rear_wheel_load_frac_est": {
+  "low": 0.25,
+  "mid": 0.4,
+  "high": 0.5,
+  "note": "share of total weight on the 2 driven rear wheels. 0.5 if front has only 2 casters and load is centred; ~0.33 if all 4 original GFS-1830 casters were kept (6 contact points, rigid deck -> statically indeterminate, depends on wheel height vs casters); 0.25 if driven wheels sit slightly high. MEASURE with bathroom scale."
+ },
+ "geometry": {
+  "deck_h_m": 0.17,
+  "deck_h_m_range": [
+   0.155,
+   0.19
+  ],
+  "ball_d_m": 0.47,
+  "ball_d_m_range": [
+   0.42,
+   0.52
+  ],
+  "bear_h_m": 1.2,
+  "bear_w_m": 0.98,
+  "bear_d_m": 0.711,
+  "stack_top_h_m": 1.84,
+  "bear_feet_h_m": 0.64,
+  "bear_com_frac_of_height": {
+   "low": 0.35,
+   "mid": 0.45,
+   "high": 0.55
+  },
+  "cog_h_m_low": 0.47,
+  "cog_h_m_mid": 0.46,
+  "cog_h_m_high": 0.5,
+  "cog_note": "whole loaded cart v2: lighter, lower stack -> CoG ~0.46-0.50 m above floor",
+  "bear_on_ball_cog_h_m_low": 0.95,
+  "bear_on_ball_cog_h_m_mid": 1.08,
+  "bear_on_ball_cog_h_m_high": 1.22,
+  "track_m": 0.4,
+  "track_note": "GFS-1830 platform 18 in = 0.457 m wide; corner casters inset ~1-1.5 in each side -> ~0.38-0.42 m. Driven wheel track unmeasured.",
+  "wheelbase_m": 0.66,
+  "wheelbase_note": "platform 30 in = 0.762 m; caster centres inset ~2 in each end -> ~0.62-0.70 m. Unmeasured.",
+  "platform_m": [
+   0.762,
+   0.457
+  ],
+  "tip_note": "static tip angle sideways = atan((track/2)/cog_h); lateral accel to tip = g*(track/2)/cog_h. Bear 43 in wide overhangs 18 in deck.",
+  "ball_d_note": "PHOTO v2 scale check (sugar box + 3in sticky note rulers): 510 px / 0.034 in/px = 17 in = 0.44-0.50 m (was 0.65 GUESS)",
+  "bear_h_m_range": [
+   1.1,
+   1.3
+  ],
+  "bear_h_note": "PHOTO v2: feet-to-head-top 1350 px -> 46 in = 1.17 m +-0.1 (listing 70 in evidently includes the stand/pole). bear_w_m (arm span in photo) 0.98 m",
+  "post_side_m": 0.022,
+  "post_side_m_range": [
+   0.019,
+   0.028
+  ],
+  "post_note": "square steel tube, scale-estimated from ball ratio in image 3; 3/4-1 in tube typical of Spirit animatronic stands",
+  "slot_m": [
+   0.13,
+   0.026
+  ],
+  "slot_note": "slot in ball top ~13 cm long x post+~3 mm wide; post sits near one end -> ~10 cm free clearance along slot, ~1-3 mm across (SEEN, scale-estimated)",
+  "bear_on_ball_cog_note": "v2: bear body 6 kg at feet+0.45x1.2 m, post 1.5 kg at 0.5 m, shell 1.5 kg at 0.235 m, all above the deck; +deck 0.17 for above-floor"
+ },
+ "anker_note": "C300, C800 Plus, C1000 all have a 12V/10A car socket (120W). If it is an F-series (F1200/F2000, 20-30 kg) totals rise ~+10-18 kg.",
+ "unknowns": [
+  "Anker SOLIX model",
+  "fog machine model",
+  "ball shell material and wall thickness",
+  "post bottom fixity (deck / base plate / nothing)",
+  "wing-nut clamp function (telescope lock vs clamp to shell)",
+  "rear wheel load share",
+  "exact deck/wood thickness",
+  "velcro patch sizes at feet and ball bottom"
+ ]
+}

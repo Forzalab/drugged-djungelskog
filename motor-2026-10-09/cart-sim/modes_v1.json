@@ -1,0 +1,542 @@
+{
+ "generated_by": "modes_calc.py (agent A, earthquake pass)",
+ "masses_source": "masses.json (agent B) total mid 44.5 kg",
+ "modes": [
+  {
+   "name": "bear_sway_armature",
+   "f_low_hz": 0.7,
+   "f_mid_hz": 1.98,
+   "f_high_hz": 4.73,
+   "damping": 0.03,
+   "basis": "steel tube cantilever 16-25 mm OD, 0.9-1.3 m, tip mass 4-6 kg; f=(1/2pi)sqrt(3EI/(mL^3)-g/L) gives 1.2/2.6/6.3 Hz for a bare tube; x0.75 for joint/bolt compliance, low floored at 0.7 Hz (torso-pivot backlash). ASSUMED armature"
+  },
+  {
+   "name": "stack_rocking_on_cart",
+   "f_low_hz": 0.79,
+   "f_mid_hz": 2.12,
+   "f_high_hz": 5.9,
+   "damping": 0.05,
+   "basis": "rigid bear+ball rocking on fixation springs: k_th=2*k*r^2 - m*g*h_cm (soft strap 5 kN/m .. hard cradle/bolts 150 kN/m at r=0.25-0.30 m); I=m_bear*h^2+m_ball*1.4R^2. RESTING ball: k_th<0 -> unstable, no mode"
+  },
+  {
+   "name": "eps_ball_flexure",
+   "f_low_hz": 3.89,
+   "f_mid_hz": 5.2,
+   "f_high_hz": 6.52,
+   "damping": 0.05,
+   "basis": "EPS sphere (E=3-8 MPa) as short beam, k_th=EI/L with I at 60% radius, bear 9 kg at 0.85-1.1 m above ball top; ASSUMES solid EPS ball"
+  },
+  {
+   "name": "cart_bounce_vertical",
+   "f_low_hz": 6.36,
+   "f_mid_hz": 9.24,
+   "f_high_hz": 13.69,
+   "damping": 0.08,
+   "basis": "6 contacts, caster PU + carpet/pad in series 15-40 kN/m each; m = whole cart; f=(1/2pi)sqrt(sum k/m)"
+  },
+  {
+   "name": "cart_pitch_roll_on_casters",
+   "f_low_hz": 4.45,
+   "f_mid_hz": 7.39,
+   "f_high_hz": 12.32,
+   "damping": 0.08,
+   "basis": "same springs, rotational: f_rot ~ 0.7-0.9 f_bounce for tall CoM on short wheelbase (ASSUMED)"
+  },
+  {
+   "name": "cart_horizontal_on_carpet",
+   "f_low_hz": 3.67,
+   "f_mid_hz": 6.4,
+   "f_high_hz": 10.82,
+   "damping": 0.1,
+   "basis": "tyre sidewall + carpet pile shear 5-25 kN/m per contact, 6 contacts; stick-slip makes this nonlinear"
+  },
+  {
+   "name": "drivetrain_loaded_stepper_spring",
+   "f_low_hz": 13.48,
+   "f_mid_hz": 16.95,
+   "f_high_hz": 22.61,
+   "damping": 0.03,
+   "basis": "rotor + cart mass (via r^2/G^2) on the stepper's magnetic spring k=T_h*50 (T_h=0.21 Nm at 1.25 A); excited by every start/stop and by step-loss chatter"
+  },
+  {
+   "name": "stepper_rotor_midband_resonance",
+   "f_low_hz": 180.38,
+   "f_mid_hz": 236.17,
+   "f_high_hz": 303.1,
+   "damping": 0.02,
+   "basis": "rotor alone (wheel slipping / gearbox backlash open): f=(1/2pi)sqrt(k_m/J_rot); classic full-step resonance 100-300 Hz"
+  },
+  {
+   "name": "arm_cantilever",
+   "f_low_hz": 2.0,
+   "f_mid_hz": 5.5,
+   "f_high_hz": 10.0,
+   "damping": 0.06,
+   "basis": "6 mm steel rod 0.5 m, 0.25 kg eff. mass; EI=12.7 Nm2, k=3EI/L^3 (ASSUMED armature)"
+  },
+  {
+   "name": "head_on_neck",
+   "f_low_hz": 3.0,
+   "f_mid_hz": 5.0,
+   "f_high_hz": 8.0,
+   "damping": 0.06,
+   "basis": "1 kg head on short neck joint, k 0.4-2.5 kN/m (ASSUMED)"
+  },
+  {
+   "name": "torso_on_dance_pivot",
+   "f_low_hz": 0.5,
+   "f_mid_hz": 1.2,
+   "f_high_hz": 2.5,
+   "damping": 0.05,
+   "basis": "torso 4 kg at 0.4 m above pivot restrained by dance gear train; backlash -> rattles at low amplitude (ASSUMED mechanism)"
+  },
+  {
+   "name": "caster_swivel_kinematic_trail",
+   "f_low_hz": 0.14,
+   "f_mid_hz": 0.18,
+   "f_high_hz": 0.24,
+   "damping": 0.5,
+   "basis": "trailing caster yaw relaxes as f=V/(2*pi*e), V=0.0455 m/s, e=3-5 cm trail; heavily damped by swivel friction (zeta ASSUMED ~0.5, overdamped-ish); becomes flutter only above ~0.5-2 m/s"
+  },
+  {
+   "name": "caster_swivel_rattle_play",
+   "f_low_hz": 8.0,
+   "f_mid_hz": 15.0,
+   "f_high_hz": 30.0,
+   "damping": 0.08,
+   "basis": "swivel bearing + axle play with lateral tyre stiffness 10-40 kN/m and caster+fork mass ~0.3 kg eff.; excited at reversals and by the 250 Hz buzz (ASSUMED)"
+  },
+  {
+   "name": "cart_pitch_load_transfer",
+   "f_low_hz": 4.0,
+   "f_mid_hz": 7.0,
+   "f_high_hz": 12.0,
+   "damping": 0.08,
+   "basis": "cart pitching about the caster/rear-wheel contact springs when the jerk shifts dN=m*a*h/L between rear wheels and casters; same springs as cart bounce, tall stack adds inertia"
+  }
+ ],
+ "excitations": [
+  {
+   "name": "segment_pattern_fundamental",
+   "f_hz": 0.278,
+   "harmonics_hz": [
+    0.28,
+    0.56,
+    0.83,
+    1.11,
+    1.39,
+    1.67,
+    1.94,
+    2.22,
+    2.5,
+    2.78,
+    3.06,
+    3.33,
+    3.61,
+    3.89,
+    4.17,
+    4.44,
+    4.72,
+    5.0,
+    5.28,
+    5.56,
+    5.83,
+    6.11,
+    6.39,
+    6.67
+   ],
+   "note": "0.8 s on / 1 s pause / 0.8 s reverse / 1 s pause; velocity-step impulses -> flat comb up to ~1/t_rise; no ramp means every harmonic to >10 Hz has ~equal strength",
+   "comb": [
+    {
+     "n": 1,
+     "f_hz": 0.278,
+     "a_amp_ms2_noramp": 0.065,
+     "a_amp_ms2_ramp1s": 0.0571
+    },
+    {
+     "n": 2,
+     "f_hz": 0.556,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 3,
+     "f_hz": 0.833,
+     "a_amp_ms2_noramp": 0.0876,
+     "a_amp_ms2_ramp1s": 0.0167
+    },
+    {
+     "n": 4,
+     "f_hz": 1.111,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 5,
+     "f_hz": 1.389,
+     "a_amp_ms2_noramp": 0.0346,
+     "a_amp_ms2_ramp1s": 0.0074
+    },
+    {
+     "n": 6,
+     "f_hz": 1.667,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 7,
+     "f_hz": 1.944,
+     "a_amp_ms2_noramp": 0.0996,
+     "a_amp_ms2_ramp1s": 0.0028
+    },
+    {
+     "n": 8,
+     "f_hz": 2.222,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 9,
+     "f_hz": 2.5,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 10,
+     "f_hz": 2.778,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 11,
+     "f_hz": 3.056,
+     "a_amp_ms2_noramp": 0.0996,
+     "a_amp_ms2_ramp1s": 0.0018
+    },
+    {
+     "n": 12,
+     "f_hz": 3.333,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 13,
+     "f_hz": 3.611,
+     "a_amp_ms2_noramp": 0.0346,
+     "a_amp_ms2_ramp1s": 0.0029
+    },
+    {
+     "n": 14,
+     "f_hz": 3.889,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 15,
+     "f_hz": 4.167,
+     "a_amp_ms2_noramp": 0.0876,
+     "a_amp_ms2_ramp1s": 0.0033
+    },
+    {
+     "n": 16,
+     "f_hz": 4.444,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 17,
+     "f_hz": 4.722,
+     "a_amp_ms2_noramp": 0.065,
+     "a_amp_ms2_ramp1s": 0.0034
+    },
+    {
+     "n": 18,
+     "f_hz": 5.0,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 19,
+     "f_hz": 5.278,
+     "a_amp_ms2_noramp": 0.065,
+     "a_amp_ms2_ramp1s": 0.003
+    },
+    {
+     "n": 20,
+     "f_hz": 5.556,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 21,
+     "f_hz": 5.833,
+     "a_amp_ms2_noramp": 0.0876,
+     "a_amp_ms2_ramp1s": 0.0024
+    },
+    {
+     "n": 22,
+     "f_hz": 6.111,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    },
+    {
+     "n": 23,
+     "f_hz": 6.389,
+     "a_amp_ms2_noramp": 0.0346,
+     "a_amp_ms2_ramp1s": 0.0016
+    },
+    {
+     "n": 24,
+     "f_hz": 6.667,
+     "a_amp_ms2_noramp": 0.0,
+     "a_amp_ms2_ramp1s": 0.0
+    }
+   ]
+  },
+  {
+   "name": "start_stop_jerk",
+   "f_hz": null,
+   "a_cmd_ms2": 11.4,
+   "a_real_ms2": [
+    0.61,
+    0.83
+   ],
+   "note": "commanded: full speed in one step (4 ms); real: torque/traction-limited (mid masses); the stack sees a_real as a ~20-40 ms pulse plus drivetrain ringing"
+  },
+  {
+   "name": "full_step_rate",
+   "f_hz": 250.0,
+   "harmonics_hz": [
+    250,
+    500,
+    750,
+    1000
+   ],
+   "note": "1.8 deg/step at motor, 0.18 mm/step at wheel; torque ripple through gearbox; audible buzz; loosens set screws"
+  },
+  {
+   "name": "stepper_midband_overlap",
+   "f_hz": 250.0,
+   "note": "250 steps/s sits inside the rotor's own 170-330 Hz resonance band -> missed steps/chatter on a slipping or backlash-open drive"
+  },
+  {
+   "name": "gearbox_mesh",
+   "f_hz": 11.1,
+   "f_range_hz": [
+    8,
+    14
+   ],
+   "note": "planetary ring teeth x output speed (0.241 rev/s x ~40-56 teeth, ASSUMED tooth counts); planet pass ~0.7 Hz x3"
+  },
+  {
+   "name": "reversal_backlash_impact",
+   "f_hz": 0.556,
+   "note": "2 direction reversals per 3.6 s cycle -> gearbox/hub backlash impacts, broadband"
+  },
+  {
+   "name": "carpet_stick_slip",
+   "f_hz": null,
+   "f_range_hz": [
+    2,
+    30
+   ],
+   "note": "tyre creep/stick on carpet pile at 0.6 mu, 0.33 load share; broadband, depends on load share"
+  },
+  {
+   "name": "caster_flip_at_reversal",
+   "f_hz": 0.556,
+   "note": "front casters must swing ~180 deg at each reversal; needs ~pi*e/2 = 5-8 cm of travel but a segment is 0.1-3.4 cm -> casters end up sideways and SCRUB: lateral force ~39 N per caster, up to 1.8 m/s2 lateral kick on the cart, yaw moment, extra rolling resistance (traction margin eaten)"
+  },
+  {
+   "name": "longitudinal_load_transfer",
+   "f_hz": null,
+   "detail": {
+    "real": {
+     "a_ms2": 0.61,
+     "dN_N": 23.6,
+     "rear_static_N": 174.7,
+     "rear_frac_change": 0.14,
+     "traction_fwd_accel_N": 119.0,
+     "traction_rev_accel_N": 90.6,
+     "note": "cart accelerating toward the rear (rear wheels push) adds dN to rear; accelerating toward casters or braking a forward run removes it"
+    },
+    "real_hi": {
+     "a_ms2": 0.83,
+     "dN_N": 32.1,
+     "rear_static_N": 174.7,
+     "rear_frac_change": 0.18,
+     "traction_fwd_accel_N": 124.1,
+     "traction_rev_accel_N": 85.5,
+     "note": "cart accelerating toward the rear (rear wheels push) adds dN to rear; accelerating toward casters or braking a forward run removes it"
+    },
+    "tip_strapped": {
+     "a_ms2": 1.68,
+     "dN_N": 64.7,
+     "rear_static_N": 174.7,
+     "rear_frac_change": 0.37,
+     "traction_fwd_accel_N": 143.7,
+     "traction_rev_accel_N": 66.0,
+     "note": "cart accelerating toward the rear (rear wheels push) adds dN to rear; accelerating toward casters or braking a forward run removes it"
+    }
+   },
+   "note": "dN=m*a*h_cm/L (L=0.60 m wheelbase ASSUMED); rear wheels GAIN load when the cart accelerates rearward-pushing and LOSE it when braking a forward run or accelerating toward the casters -> asymmetric slip fwd vs rev -> net creep"
+  },
+  {
+   "name": "try_me_dance_torso_sway",
+   "f_hz": 0.75,
+   "f_range_hz": [
+    0.4,
+    1.5
+   ],
+   "note": "'torso moves side-to-side on moving ball' (box text), 20 s cycle (MEASURED); sway rate ESTIMATED 0.4-1.5 Hz = inside bear sway band by design"
+  }
+ ],
+ "forbidden_bands_hz": [
+  [
+   0.5,
+   6.0
+  ],
+  [
+   6.0,
+   15.0
+  ],
+  [
+   15.0,
+   40.0
+  ],
+  [
+   150.0,
+   330.0
+  ]
+ ],
+ "forbidden_bands_note": [
+  "0.5-6 Hz: bear sway, torso pivot, stack rocking -> no periodic start/stop pattern with fundamental or strong harmonics here; ramp >= 1 s kills them",
+  "6-15 Hz: cart bounce/pitch + gearbox mesh; keep full-step pulse-train subharmonics and chatter out",
+  "15-40 Hz: loaded drivetrain mode; starts/stops ring here, avoid step rates 15-40 full steps/s",
+  "150-330 Hz: stepper rotor mid-band; current 250 full steps/s is INSIDE; fix with microstepping (1/8-1/16) or move to <100 or >400 full steps/s"
+ ],
+ "cog_height_m": 1.171,
+ "cog_height_note": "bear+ball stack CoM above the cart deck (mid masses); whole cart CoM above floor = 0.52 m",
+ "base_halfwidth_m": 0.2,
+ "base_halfwidth_note": "stack base half-width by fixation: {\"resting\": 0.02, \"strapped\": 0.2, \"bolted\": 0.3}",
+ "tip_accel_ms2": 1.68,
+ "tip_accel_by_case_ms2": {
+  "resting": 0.17,
+  "strapped": 1.68,
+  "bolted": 2.51
+ },
+ "tip_accel_whole_cart_ms2": {
+  "longitudinal": 7.16,
+  "transverse": 4.33
+ },
+ "jerk_accel_ms2": {
+  "commanded": 11.4,
+  "realistic_low": 0.61,
+  "realistic_high": 0.83,
+  "note": "commanded = 4.55 cm/s in one 4 ms step; realistic = torque-limited (at 250 steps/s .. first-step holding torque) or traction-limited, minus rolling resistance"
+ },
+ "load_transfer": {
+  "real": {
+   "a_ms2": 0.61,
+   "dN_N": 23.6,
+   "rear_static_N": 174.7,
+   "rear_frac_change": 0.14,
+   "traction_fwd_accel_N": 119.0,
+   "traction_rev_accel_N": 90.6,
+   "note": "cart accelerating toward the rear (rear wheels push) adds dN to rear; accelerating toward casters or braking a forward run removes it"
+  },
+  "real_hi": {
+   "a_ms2": 0.83,
+   "dN_N": 32.1,
+   "rear_static_N": 174.7,
+   "rear_frac_change": 0.18,
+   "traction_fwd_accel_N": 124.1,
+   "traction_rev_accel_N": 85.5,
+   "note": "cart accelerating toward the rear (rear wheels push) adds dN to rear; accelerating toward casters or braking a forward run removes it"
+  },
+  "tip_strapped": {
+   "a_ms2": 1.68,
+   "dN_N": 64.7,
+   "rear_static_N": 174.7,
+   "rear_frac_change": 0.37,
+   "traction_fwd_accel_N": 143.7,
+   "traction_rev_accel_N": 66.0,
+   "note": "cart accelerating toward the rear (rear wheels push) adds dN to rear; accelerating toward casters or braking a forward run removes it"
+  }
+ },
+ "cart_pitch_static_rad": 0.00157,
+ "caster": {
+  "kinematic_mode_hz": [
+   0.145,
+   0.181,
+   0.241
+  ],
+  "flip_distance_m": [
+   0.047,
+   0.063,
+   0.079
+  ],
+  "segment_travel_m": [
+   0.001,
+   0.016,
+   0.034
+  ],
+  "flip_completes": "NO at 0.1-1.6 cm travel; MAYBE at 3.4 cm with 3 cm trail",
+  "scrub_force_per_caster_N": 39.3,
+  "lateral_cart_accel_if_two_casters_scrub_ms2": 1.77,
+  "shimmy_flutter_threshold_ms": "typ. 0.5-2 m/s for furniture casters (lateral tyre compliance + low swivel friction); at 0.045 m/s flutter is NOT expected"
+ },
+ "single_pulse_energy_check": {
+  "resting": {
+   "E_tip_J": 0.02,
+   "KE_pulse_J": 0.0106,
+   "single_pulse_overturns": false
+  },
+  "strapped": {
+   "E_tip_J": 2.022,
+   "KE_pulse_J": 0.0106,
+   "single_pulse_overturns": false
+  },
+  "bolted": {
+   "E_tip_J": 4.55,
+   "KE_pulse_J": 0.0106,
+   "single_pulse_overturns": false
+  }
+ },
+ "resonant_buildup_at_sway_mode": {
+  "f_hz": 1.98,
+  "per_harmonic_base_accel_ms2": 0.1,
+  "response": {
+   "2%": {
+    "a_rel_ms2": 2.49,
+    "x_cm_at_com_cm": 1.6,
+    "cycles_to_build": 25
+   },
+   "5%": {
+    "a_rel_ms2": 1.0,
+    "x_cm_at_com_cm": 0.6,
+    "cycles_to_build": 10
+   }
+  }
+ },
+ "stack": {
+  "m_kg": 12.07,
+  "I_base_kgm2": 19.54,
+  "h_bear_com_m": 1.45
+ },
+ "whole_cart": {
+  "m_kg": 44.5,
+  "h_cm_m": 0.521
+ },
+ "recommended_profile": {
+  "microstep": 16,
+  "ramp_s": 1.0,
+  "ramp_shape": "S-curve (sin^2)",
+  "cruise_full_steps_per_s_max": 250,
+  "min_dwell_s": 2.0,
+  "dwell_jitter": "uniform 2-4 s, never periodic",
+  "no_drive_during_try_me": true,
+  "max_segment_accel_ms2": 0.5,
+  "note": "keep every start/stop acceleration below 1/3 of tip_accel (strapped case 1.6 m/s2)"
+ }
+}
