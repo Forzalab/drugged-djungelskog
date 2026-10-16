@@ -1,0 +1,40 @@
+"""frankie_voice.py — Frankie's sox chains: distorted but clear. Used by frankie.py."""
+import bear_voices as bv
+
+# NORMAL: sarcastic, self-aware, creepy-robotic bear.
+#   pitch -150         : a bit deeper/bear-ish, moderate so vowels stay natural
+#   tempo 0.92         : slightly slower = clearer over a small BT speaker in a noisy hall
+#   overdrive 6 8      : mild grit (gain 6, colour 8) -- distorted texture without mush
+#   compand ...        : fast compressor, evens out loudness so quiet consonants survive the room
+#   tremolo 90 35      : 90 Hz amplitude mod at 35% depth -> ring-mod-ish robotic buzz
+#   echo 0.8 0.6 12 0.25 : single 12 ms slap -> metallic "tin can" colour, too short to smear words
+#   + bv.CLEAR         : highpass 150, +6 dB @3 kHz, -3 dB @250 Hz, lowpass 7500, normalize -1 dBFS
+NORMAL_FX = [
+    "pitch", "-150",
+    "tempo", "0.92",
+    "overdrive", "6", "8",
+    "compand", "0.01,0.15", "6:-60,-40,-20", "-6", "-90", "0.02",
+    "tremolo", "90", "35",
+    "echo", "0.8", "0.6", "12", "0.25",
+] + bv.CLEAR
+
+# ANGRY: more distorted/aggressive, still intelligible.
+#   pitch -250         : deeper/meaner, still within the range where words stay crisp
+#   tempo 0.95         : near-normal speed (angry = punchier), still slightly slowed for clarity
+#   gain -6            : headroom before the heavier drive so it doesn't hard-clip
+#   overdrive 14 15    : heavier saturation/growl
+#   compand ...        : harder, faster compression -> in-your-face, consonants pushed up
+#   tremolo 110 50     : faster, deeper ring-mod buzz -> harsher robot
+#   echo 0.8 0.55 8 0.3: 8 ms metallic slap
+#   phaser ... -t      : light triangle phaser for a menacing, unstable metallic sweep
+#   + bv.CLEAR         : same legibility EQ + normalize
+ANGRY_FX = [
+    "pitch", "-250",
+    "tempo", "0.95",
+    "gain", "-6",
+    "overdrive", "14", "15",
+    "compand", "0.005,0.1", "6:-60,-35,-15", "-4", "-90", "0.01",
+    "tremolo", "110", "50",
+    "echo", "0.8", "0.55", "8", "0.3",
+    "phaser", "0.7", "0.7", "2", "0.4", "0.6", "-t",
+] + bv.CLEAR

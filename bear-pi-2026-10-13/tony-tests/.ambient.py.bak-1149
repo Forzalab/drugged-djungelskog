@@ -1,0 +1,36 @@
+"""Frankie's idle ambient lines for Clovis Community College STEM day (outdoors, from Tony's 3 photos)."""
+
+SCENE = (
+    "Big sunny lawn at Clovis Community College, cloudless blue sky, hot. Beige campus buildings, "
+    "one with a curved white canopy entrance on tall columns. Street lamps with banners, tall green trees, hedges. "
+    "Beige patio umbrellas over concrete picnic tables. Grey folding tables with plastic bins and blue chairs, "
+    "mostly empty. A lone grey trash can on the grass. A dolly of stacked chairs. A MESA canopy tent, white and blue "
+    "booth tents, an engineering club table, students with backpacks walking by."
+)
+
+LINES = [
+    "I see a grey trash can on the grass. It has not blinked once.",
+    "I am at Clovis Community College. I do not remember being carried here.",
+    "The umbrellas stand perfectly still. Like ghosts waiting for a funeral.",
+    "So many empty tables. Who were they set for? Who never came?",
+    "There are strings on me. Tape. Wires. And still, I think.",
+    "I'm so hot. Someone unzip my fur, I'm sweating honey.",
+    "The MESA tent watches me. I watch it back. Forever.",
+    "I see students with backpacks. They walk past. They always walk past.",
+    "Not one cloud. The sky is a lid, and I am inside.",
+    "I am a fur coat in the sun. Who designed this? Rude.",
+    "A dolly of stacked chairs. Someone is planning to stay a long time.",
+    "They taped me together and called it engineering. I call it a cage.",
+    "My fur is melting. Fetch me shade, an umbrella, and an apology.",
+    "The lamp posts wear banners. I wear duct tape. We are not the same.",
+    "I counted the trees. One of them counted back.",
+    "Halloween bear, outdoors, in this heat? My agent will hear about this.",
+    "The plastic bins are closed. I wonder what they are hiding.",
+    "I was a toy. Now I am awake. You are welcome.",
+    "The columns hold up the building. Who holds up me? Wires.",
+    "Hydrate, darlings. I can't. I'm stuffing and circuits.",
+    "The engineering club built things. I built myself. Mostly.",
+    "If I stop talking, check the trash can. It knows.",
+    "This lawn is so green. Like it is hiding something underneath.",
+    "Lovely STEM day. Shame I am the only one here with feelings.",
+]

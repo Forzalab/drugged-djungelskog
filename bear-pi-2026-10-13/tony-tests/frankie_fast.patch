@@ -1,0 +1,69 @@
+--- frankie.py
++++ frankie.py
+@@ -175,6 +175,16 @@
+             except Exception as e:
+                 log(f"prerender error: {e!r}")
+     log(f"prerendered {sum(_pre_path(l).is_file() for l in SEXY)}/{len(SEXY)} sexy-back preambles")
++
++
++try:  # frankie_fast.py (agent C 11:10): pre-rendered cache for ALL scripted lines, render‖play pipeline, ≤3 s cap,
++    import frankie_fast  # gesture cut keeps queued gesture lines (several detections → several reactions)
++    _scripted = ANGRY + STOPS + LORE + [ACTIVATED] + SEXY + (sum(cw.GESTURE_SELF_AWARE.values(), []) if cw else [])
++    voice = frankie_fast.FastVoice(render, PRE, prerender=_scripted, log=log)
++    FAST = True
++except Exception as e:
++    log(f"frankie_fast unavailable ({e!r}); plain Voice")
++    FAST = False
+ REARM = 10.0  # same gesture again within this = the same held hand flickering, ignore
+ state = {"hold_until": 0.0, "armed": {}, "gesture": "none", "last_dance": -1e9, "last_gesture": -1e9, "quiet_until": 0.0, "gemini": 0}
+ 
+@@ -239,7 +249,7 @@
+         state["last_gesture"], state["quiet_until"] = now, now + QUIET
+         line = random.choice(STOPS)
+         log(f"GESTURE open_palm → stop + quiet {QUIET:.0f}s: {line}")
+-        voice.say(line, NORMAL_FX, cut=True)
++        voice.say(line, NORMAL_FX, cut="all" if FAST else True)
+ 
+ 
+ def on_scene_description(text):
+@@ -254,7 +264,7 @@
+     elif now - state["last_gesture"] < GESTURE_HOLD or voice.busy or not voice.q.empty():
+         log(f"scene skipped (gesture has priority / still talking): {text}")
+     else:
+-        text = " ".join(text.split()[:40])
++        text = frankie_fast.shorten(text, 9) if FAST else " ".join(text.split()[:40])  # ≤3 s spoken
+         log(f"SCENE: {text}")
+         voice.say(text, NORMAL_FX)
+ 
+@@ -269,6 +279,13 @@
+         return "NONE"
+     state["gemini"] += 1
+     log(f"gemini call {state['gemini']}/{GEMINI_MAX}")
++    if FAST and os.environ.get("BEAR_OR", "1") != "0" and args:
++        import or_scene  # race: Gemini and OpenRouter at once, first good answer wins (~1 s instead of 25 s timeout)
++        who, text = frankie_fast.race({"gemini": lambda: _describe(*args, **kwargs),
++                                       "openrouter": lambda: or_scene.describe(args[0], barnaby.scene.PROMPT, timeout=5.0)},
++                                      timeout=8.0)
++        log(f"scene winner: {who}" + (f" {getattr(or_scene, 'last_winner', '?')}" if who == "openrouter" else ""))
++        return text
+     try:
+         return _describe(*args, **kwargs)
+     except Exception as e:
+@@ -289,7 +306,7 @@
+ if __name__ == "__main__":
+     argv = sys.argv[1:]
+     if os.environ.get("NO_GEMINI") != "1" and "--scene" not in argv:
+-        argv += ["--scene", "--scene-model", "gemini-3.5-flash-lite", "--scene-interval", "20"]
++        argv += ["--scene", "--scene-model", "gemini-3.5-flash-lite", "--scene-interval", "12", "--scene-timeout", "6"]
+     log(f"start: dance={DANCE_BIN} song={SONG.name if SONG else 'none (spoken)'} args={' '.join(argv)}")
+     # Tony: volume max 60 % until 11:45 today, then 150 % (>1.0 = clips, on purpose)
+     vol = os.environ.get("FRANKIE_VOL") or ("0.6" if time.strftime("%Y-%m-%d %H:%M") < "2026-10-13 11:45" else "1.5")
+@@ -303,6 +320,8 @@
+         voice.say(random.choice(LORE))
+     mark.touch()
+     threading.Thread(target=prerender, daemon=True).start()
++    if FAST:
++        voice.start_prerender()  # ANGRY/STOPS/LORE/ACTIVATED (+SEXY, crowdwork) → ~/tony-tests/prerender, instant lines
+     try:
+         import detect_tuning  # aggressive detection: lower thresholds + faster inference (agent B, 10:58)
+         detect_tuning.apply()

@@ -1,0 +1,3 @@
+# 2026-10-13T19:22:51.512967Z UTC  agent=a37c36  (verbatim command from transcript; secrets REDACTED)
+# result head: 'Exit code 1\nen_GB-alan-medium.onnx\nen_GB-alan-medium.onnx.json\nen_GB-northern_english_male-medium.onnx\nen_GB-northern_english_male-medium.onnx.json\nru_RU-denis-medium.onnx\nru_RU-denis-medium.onnx.json\nru_RU-dmitri-medium.onnx\nru_RU-dmitri-medium.onnx.json\n1:"""frankie_voice.py — Frankie\'s voice coll'
+cd /home/spauly/tony-tests; ls voices; grep -n "_voice\|_synth\|def \|PiperVoice\|synth" frankie_voice.py | head -40; grep -n "def speak" -A45 scene_cam.py; grep -n "dance_loop" -B3 -A8 guardian.sh; which espeak-ng sox pw-play

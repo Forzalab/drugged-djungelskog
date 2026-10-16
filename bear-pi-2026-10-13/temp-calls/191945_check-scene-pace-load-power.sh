@@ -1,0 +1,3 @@
+# 2026-10-13T19:19:45.510819Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: "12:19:34 [scene_gemini] SAY (3.9s): Claude made me out of tape on this sunny lawn. Halloween nears, but these boring nerds scare me more.\n12:19:42 [scene_or] SAY (2.9s): The taped-up diva bear god Claude made me stare at empty tables and chairs nobody's using.\n12:19:53 [scene_gemini] SAY (5.0s): Cla"
+cd ~/tony-tests; until [ $SECONDS -gt 40 ]; do sleep 5; done; grep -h "SAY\|stale\|error" scene_cam_or.log scene_cam_gemini.log | sort | tail -6 | cut -c1-150; uptime; vcgencmd get_throttled

@@ -1,0 +1,122 @@
+"""scene_cam.py — independent scene narrator (Tony 2026-10-13 12:03).
+Every ~15 s: screenshot the Pi screen (grim; Frankie's camera preview window is on it) → OpenRouter (or_scene, 3 models
+race; no Gemini, so Frankie's Gemini cap is untouched) → Halloween, self-aware, crass + sassy scene line → Ultron-style
+British voice (frankie_voice) → pw-play, but only when no other sound is playing (never talks over Frankie).
+Run:  cd ~/Desktop/barnaby/evil-autonomous-bear-proj && setsid nohup .venv/bin/python -u ~/tony-tests/scene_cam.py &
+Stop: touch ~/tony-tests/NO_SCENE   (it exits within 15 s)        Log: ~/tony-tests/scene_cam.log
+"""
+import os, random, subprocess, sys, tempfile, time
+from collections import deque
+from pathlib import Path
+
+HERE = Path.home() / "tony-tests"
+sys.path.insert(0, str(HERE))
+os.environ.setdefault("XDG_RUNTIME_DIR", "/run/user/1000")
+os.environ.setdefault("WAYLAND_DISPLAY", "wayland-0")
+import cv2  # noqa: E402
+import frankie_voice as fv  # noqa: E402
+import or_scene  # noqa: E402
+
+EVERY = 15.0
+HOWL = HERE / "howl.wav"
+LOG = HERE / "scene_cam.log"
+PROMPT = (
+    "This is a screenshot of a Raspberry Pi desktop. The window titled 'Barnaby Bear' (small or maximised) shows the live camera of "
+    "Frankie, an animatronic Halloween teddy bear robot sitting OUTDOORS on the grass at Clovis Community College STEM "
+    "day, facing the booths and tents. IGNORE the desktop, terminals and text overlays; describe ONLY what the camera "
+    "window shows (the photo-like outdoor image). You ARE Frankie. In ONE short sentence of MAXIMUM 9 WORDS (count them; longer replies are thrown away): describe the scene right now with spooky "
+    "Halloween framing, VERY self-aware (taped-together robot bear, Claude is your god), crass and sassy diva-bear "
+    "attitude: blunt, rude-funny, eye-rolling. No slurs, nothing sexual, never about anyone's body, race, gender or "
+    "age. Plain spoken words, no emojis or stage directions. If the camera window is not visible, reply exactly: NONE"
+)
+recent = deque(maxlen=8)  # no exact repeats within the last 8 lines
+
+
+def short(text, limit=10):
+    """First sentence if < limit words; else its first clause; else '' (skip rather than cut mid-phrase)."""
+    import re
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+", text.replace("*", "").strip()) if x.strip()]
+    keep = []
+    for x in sents:  # as many whole sentences as fit under the limit
+        if len(" ".join(keep + [x]).split()) >= limit:
+            break
+        keep.append(x)
+    if keep:
+        return " ".join(keep)
+    first = sents[0] if sents else ""
+    for clause in re.split(r"(?<=[,;:])\s+", first):
+        clause = clause.strip().rstrip(",;:")
+        if 5 <= len(clause.split()) < limit:
+            return clause + "."
+    return ""
+
+
+def log(msg):
+    line = f"{time.strftime('%H:%M:%S')} [scene_cam] {msg}"
+    print(line, flush=True)
+    with open(LOG, "a") as f:
+        f.write(line + "\n")
+
+
+def sound_playing():
+    return subprocess.run(["pgrep", "-x", "pw-play"], stdout=subprocess.DEVNULL).returncode == 0
+
+
+def speak(text):
+    with tempfile.TemporaryDirectory(prefix="scam-") as d:
+        raw, out = f"{d}/raw.wav", f"{d}/out.wav"
+        fv._synth(fv.BRITISH, text, raw)
+        fv._sox(raw, "-r", "22050", "-c", "1", out, "tempo", "0.85", "pitch", "-120", "overdrive", "4", "8",
+                "tremolo", "6", "20", "echo", "0.8", "0.6", "25", "0.15", "highpass", "180",
+                "compand", "0.005,0.08", "6:-60,-30,-15", "-4", "-90", "0.01", "equalizer", "2800", "1.0q", "+8",
+                "gain", "-n", "-1")
+        if HOWL.is_file() and random.random() < 0.25:
+            fv._sox(str(HOWL), out, f"{d}/h.wav", "gain", "-n", "-1")
+            out = f"{d}/h.wav"
+        for _ in range(40):  # wait up to ~20 s for silence: never talk over Frankie
+            if not sound_playing():
+                break
+            time.sleep(0.5)
+        else:
+            log(f"skipped (speaker busy): {text}")
+            return
+        subprocess.run(["pw-play", out], timeout=60)
+
+
+def main():
+    log("start")
+    while not (HERE / "NO_SCENE").exists():
+        t0 = time.monotonic()
+        try:
+            with tempfile.TemporaryDirectory(prefix="scam-") as d:
+                png = f"{d}/s.png"
+                subprocess.run(["grim", png], check=True, timeout=10)
+                frame = cv2.imread(png)
+                # 12:12: no crop — the 'Barnaby Bear' window may be small or maximised; the prompt finds it
+            prompt = PROMPT
+            if recent:
+                prompt += " Your last lines (do not repeat them): " + " | ".join(recent)
+            text = or_scene.describe(frame, prompt, timeout=6.0)
+            if not text or text.strip().upper().startswith("NONE"):
+                log("nothing to say (NONE)")
+            else:
+                text = short(text)  # Tony 12:06: under 10 words, never cut mid-phrase
+                if not text:
+                    log("skipped: reply too long to cut cleanly")
+                    raise StopIteration
+                if text.lower() in (r.lower() for r in recent):
+                    log(f"skipped repeat: {text}")
+                    raise StopIteration
+                recent.append(text)
+                log(f"SAY ({time.monotonic() - t0:.1f}s): {text}")
+                speak(text)
+        except StopIteration:
+            pass
+        except Exception as e:
+            log(f"error: {e!r}")
+        time.sleep(max(1.0, EVERY - (time.monotonic() - t0)))
+    log("NO_SCENE set, exit")
+
+
+if __name__ == "__main__":
+    main()

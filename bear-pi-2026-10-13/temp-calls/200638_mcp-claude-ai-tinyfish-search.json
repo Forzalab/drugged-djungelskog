@@ -1,0 +1,13 @@
+{
+ "utc": "2026-10-13T20:06:38.889080Z",
+ "agent": "main",
+ "tool": "mcp__claude_ai_TinyFish__search",
+ "input": {
+  "domain_type": "news",
+  "location": "US",
+  "purpose": "Light, funny, kid/college-safe headlines for a joking Halloween robot bear at a college STEM fair to riff on",
+  "query": "funny weird viral news this week",
+  "recency_minutes": 4320
+ },
+ "result_head": "{\n  \"query\": \"funny weird viral news this week\",\n  \"results\": [\n    {\n      \"date\": \"44 minutes ago\",\n      \"position\": 1,\n      \"publisher\": \"News-Medical\",\n      \"site_name\": \"www.news-medical.net\",\n      \"snippet\": \"Researchers at Gladstone Institutes have uncovered an extraordinarily unusual bacterial immune system that operates in reverse of known defenses.\",\n      \"title\": \"Scientists find strange bacterial immune system that works backward\",\n      \"url\": \"https://www.news-medical.net/news"
+}

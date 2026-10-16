@@ -1,0 +1,13 @@
+{
+ "utc": "2026-10-13T20:12:30.719779Z",
+ "agent": "main",
+ "tool": "mcp__claude_ai_TinyFish__search",
+ "input": {
+  "domain_type": "news",
+  "location": "US",
+  "purpose": "Recent Fresno State and Boise State football results for rivalry jokes",
+  "query": "Fresno State Bulldogs Boise State Broncos football 2026",
+  "recency_minutes": 20160
+ },
+ "result_head": "{\n  \"query\": \"Fresno State Bulldogs Boise State Broncos football 2026\",\n  \"results\": [],\n  \"total_results\": 0,\n  \"page\": 0\n}"
+}

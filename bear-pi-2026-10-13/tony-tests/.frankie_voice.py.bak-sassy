@@ -1,0 +1,94 @@
+"""frankie_voice.py — Frankie's voice collage (Tony 2026-10-13 10:40): always the ANGRY voice first (British on top +
+low distorted Russian underneath), then the rest of the line in random chunks: angry / Russian only / high baby,
+with random growls between chunks. Whole thing ends in a mechanical, deliberately clipped chain (max loudness).
+render(text, fx, out) is used by frankie.py (fx is ignored: one voice for everything).
+Older versions: .frankie_voice.py.bak-mix2 / -mix1 / -alan / -agent
+"""
+import random, re, subprocess, tempfile, wave
+from pathlib import Path
+
+VOICES = Path.home() / "tony-tests/voices"
+BRITISH, RUSSIAN = VOICES / "en_GB-alan-medium.onnx", VOICES / "ru_RU-dmitri-medium.onnx"
+VOICE_PATH = BRITISH  # frankie.py compatibility
+NORMAL_FX = ANGRY_FX = "angry"
+
+BRIT_ANGRY = ["pitch", "-80", "tempo", "0.95", "overdrive", "2", "5"]
+RUS_LOW = ["pitch", "-450", "tempo", "0.95", "overdrive", "8", "10", "lowpass", "2500"]
+BABY = ["pitch", "+750", "tempo", "0.85", "overdrive", "4", "10"]
+RUS_UNDER = 0.3  # Russian layer volume under the British in the angry voice
+FINAL = ["highpass", "120", "tremolo", "100", "5", "echo", "0.8", "0.6", "10", "0.2",
+         "equalizer", "3000", "1.2q", "+6", "lowpass", "7500", "gain", "-n", "-0.5"]  # loud, no clipping
+# Growl: low wobbling sawtooth, overdriven and muffled.
+GROWL = ["synth", "0.7", "sawtooth", "75-45", "tremolo", "22", "90", "overdrive", "30", "20", "lowpass", "900",
+         "fade", "0.05", "0.7", "0.25"]
+P_GROWL = 0.0  # Tony 10:45: only angry, no growls
+STYLES, WEIGHTS = ["angry"], [1.0]  # Tony 10:45: only angry (was angry/russian/baby)
+
+_loaded = {}
+
+
+def _voice(path):
+    if path not in _loaded:
+        from piper import PiperVoice
+        _loaded[path] = PiperVoice.load(str(path))
+    return _loaded[path]
+
+
+def _sox(*args):
+    subprocess.run(["sox", *args], check=True, timeout=60, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _dur(path):
+    with wave.open(path) as w:
+        return w.getnframes() / w.getframerate()
+
+
+def _synth(path, text, out):
+    with wave.open(out, "wb") as wf:
+        _voice(path).synthesize_wav(text, wf)
+
+
+def _chunks(text):
+    """Split at punctuation; a single long clause is cut every ~5 words."""
+    parts = [p.strip() for p in re.split(r"(?<=[.,!?;:])\s+", text) if p.strip()]
+    if len(parts) == 1 and len(text.split()) > 8:
+        w = text.split()
+        parts = [" ".join(w[i:i + 5]) for i in range(0, len(w), 5)]
+    return parts
+
+
+def _chunk(style, text, d, i):
+    """One chunk in one style → normalized 22050 Hz mono wav path."""
+    out, a, b = f"{d}/c{i}.wav", f"{d}/a{i}.wav", f"{d}/b{i}.wav"
+    if style == "baby":
+        _synth(BRITISH, text, a)
+        _sox(a, "-r", "22050", "-c", "1", out, *BABY, "gain", "-n", "-3")
+    elif style == "russian":
+        _synth(RUSSIAN, text, a)
+        _sox(a, "-r", "22050", "-c", "1", out, *RUS_LOW, "gain", "-n", "-3")
+    else:  # angry: British on top + low Russian underneath, Russian stretched to the British length
+        _synth(BRITISH, text, a)
+        _synth(RUSSIAN, text, b)
+        brit, rus = f"{d}/ab{i}.wav", f"{d}/ar{i}.wav"
+        _sox(a, "-r", "22050", "-c", "1", brit, *BRIT_ANGRY, "gain", "-n", "-3")
+        factor = max(0.3, min(3.0, _dur(b) / max(_dur(a), 0.05)))
+        _sox(b, "-r", "22050", "-c", "1", rus, "tempo", f"{factor:.3f}", *RUS_LOW, "gain", "-n", "-3")
+        _sox("-m", "-v", "1", brit, "-v", str(RUS_UNDER), rus, "-r", "22050", "-c", "1", out, "gain", "-n", "-3")
+    return out
+
+
+def render(text, fx=None, out="frankie.wav", rng=random):
+    with tempfile.TemporaryDirectory(prefix="fv-") as d:
+        parts = []
+        for i, chunk in enumerate(_chunks(text)):
+            if i > 0 and rng.random() < P_GROWL:
+                g = f"{d}/g{i}.wav"
+                _sox("-n", "-r", "22050", "-c", "1", g, *GROWL)
+                parts.append(g)
+            style = "angry" if i == 0 else rng.choices(STYLES, WEIGHTS)[0]
+            parts.append(_chunk(style, chunk, d, i))
+        if len(parts) > 1 and rng.random() < P_GROWL:
+            g = f"{d}/gend.wav"
+            _sox("-n", "-r", "22050", "-c", "1", g, *GROWL)
+            parts.append(g)
+        _sox(*parts, str(out), *FINAL)

@@ -1,0 +1,13 @@
+{
+ "utc": "2026-10-13T20:12:30.052586Z",
+ "agent": "main",
+ "tool": "mcp__claude_ai_TinyFish__search",
+ "input": {
+  "domain_type": "news",
+  "location": "US",
+  "purpose": "Light local Fresno/Clovis headlines for a joking robot bear at Clovis Community College STEM day",
+  "query": "Fresno Clovis local news today",
+  "recency_minutes": 4320
+ },
+ "result_head": "{\n  \"query\": \"Fresno Clovis local news today\",\n  \"results\": [\n    {\n      \"date\": \"2 hours ago\",\n      \"position\": 1,\n      \"publisher\": \"Fresno Bee\",\n      \"site_name\": \"www.fresnobee.com\",\n      \"snippet\": \"Thanks to a new $79,000 grant, the Clovis Police Department will soon amp up its crackdown on illegal alcohol sales within the city. The news came in a...\",\n      \"title\": \"Clovis police targeting alcohol sales to minors with $79,000 grant\",\n      \"url\": \"https://www.fresnobee.com/news/loca"
+}

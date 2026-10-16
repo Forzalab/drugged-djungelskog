@@ -1,0 +1,3 @@
+# 2026-10-13T20:06:08.807340Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: "13:05:38 [scene_or2] SAY (1.5s): Cielo gris y árboles skibidi, payasos.\n13:05:39 [scene_gemini] SAY (2.8s): Bozhe moi, comrade nerds, it's giving zero rizz. These clowns holding plates outdoors are dumber than my duct tape. Nyet.\n13:05:39 [scene_or] SAY (1.9s): one in glasses holding a paper plate.\n"
+cd ~/tony-tests; until [ "$(grep -h 'SAY' scene_cam_or.log scene_cam_gemini.log scene_cam_or2.log 2>/dev/null | awk '$1>="13:05:26"' | wc -l)" -ge 3 ] || [ $SECONDS -gt 90 ]; do sleep 4; done; grep -h "SAY\|error" scene_cam_or.log scene_cam_gemini.log scene_cam_or2.log 2>/dev/null | awk '$1>="13:05:26"' | sort | cut -c1-170; uptime; vcgencmd get_throttled

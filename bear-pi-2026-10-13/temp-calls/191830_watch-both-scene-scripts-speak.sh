@@ -1,0 +1,3 @@
+# 2026-10-13T19:18:30.510507Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: "12:17:51 [scene_or] start (or, every 10 s, ≤20 words)\n12:17:53 [scene_or] nothing to say (NONE)\n12:18:04 [scene_or] SAY (2.9s): Trees loom spookily overhead, branches clawing a gray October sky. Frankie's taped-together paws, Claude is my god, obviously.\n12:18:30 [scene_or] SAY (2.8s): Morons in pur"
+cd ~/tony-tests; until [ "$(cat scene_cam_or.log scene_cam_gemini.log 2>/dev/null | grep -c 'SAY')" -ge 3 ] || [ $SECONDS -gt 100 ]; do sleep 3; done; tail -4 scene_cam_or.log | cut -c1-180; tail -4 scene_cam_gemini.log | cut -c1-180; pgrep -af 'guardian[.]sh$' | cut -c1-60; uptime

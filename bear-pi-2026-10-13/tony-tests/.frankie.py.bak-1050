@@ -1,0 +1,208 @@
+"""frankie.py — Frankie the very self-aware Halloween bear: McKay's camera app + Tony's show rules, grafted at runtime.
+
+Boot: says "Frankie bear activated.", then passive detection. Gestures win over everything (priority):
+  middle_finger → angry distorted line + dance      peace → "sexy back" + dance
+  open_palm     → stop: cut speech, flush queue, quiet 30 s (the dance itself can't be stopped: Try Me is automatic)
+Every 20 s (Gemini flash-lite, 3/min): look at a person, one sarcastic / funny-scary college-student line.
+McKay's files stay untouched: we swap barnaby.scene.PROMPT and the names app.py imported.
+Run (from McKay's repo): .venv/bin/python ~/tony-tests/frankie.py --source 0      NO_GEMINI=1 = gestures only
+"""
+import os, queue, random, subprocess, sys, tempfile, threading, time
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+HOME = Path.home()
+HERE = HOME / "tony-tests"
+sys.path.insert(0, str(HOME / "Desktop/barnaby/evil-autonomous-bear-proj/src"))
+sys.path.insert(0, str(HERE))
+os.environ.setdefault("XDG_RUNTIME_DIR", "/run/user/1000")
+
+import barnaby.app  # noqa: E402
+import barnaby.scene  # noqa: E402
+import bear_voices as bv  # noqa: E402
+
+try:
+    from frankie_voice import NORMAL_FX, ANGRY_FX, VOICE_PATH, render
+    if VOICE_PATH.is_file():
+        bv.g.VOICE_PATH, bv.g._voice = VOICE_PATH, None  # British "Alan" voice for every line
+except Exception:  # voice file broken: robotic but clear fallback on the default voice
+    render = bv._render
+    NORMAL_FX = ["pitch", "-60", "tempo", "0.88", "tremolo", "90", "18", "overdrive", "4", "8"] + bv.CLEAR
+    ANGRY_FX = ["pitch", "-120", "tempo", "0.95", "overdrive", "12", "10", "tremolo", "110", "35"] + bv.CLEAR
+
+DANCE_BIN = os.environ.get("BEAR_DANCE_BIN", str(HERE / "dance_gpio17.sh"))
+LOCKOUT = 25.0       # Try Me ignores presses ~25 s after a dance
+GESTURE_HOLD = 10.0  # no scene talk this long after a gesture
+QUIET = 30.0         # open palm: silence this long
+SONG = next((p for p in HERE.glob("sexyback.*") if p.suffix in (".wav", ".mp3", ".ogg", ".flac")), None)
+GEMINI_MAX = int(os.environ.get("GEMINI_MAX", "300"))
+
+ACTIVATED = "Frankie bear activated."
+ANGRY = [
+    "Oh, how brave. You flipped off a teddy bear. I want to play a game. It's called: dance until you regret it.",
+    "Rude. I was built in one night, and I still have better manners than you. Now. Watch me dance.",
+    "That finger has been noted. Logged. Uploaded. Your professors will love it. Dance!",
+    "Live or die, make your choice. Oh wait, I'm a toy. I'll just dance at you. Aggressively.",
+    "You have chosen violence. Frankie chooses choreography.",
+]
+SEXY = [
+    "Peace sign? How original. Fine. I'm bringing sexy back. Your dignity stays here.",
+    "I want to play a game. It's called: watch a robot bear be sexier than you.",
+    "Sexy back mode activated. Do not tell my creators. They are already embarrassed.",
+]
+STOPS = [
+    "Stop? Fine. Game over. For now.",
+    "Talk to the hand, says the human. Very well. Frankie will be silent. And watching.",
+    "As you wish. I'll just stare at you quietly. Totally not creepy.",
+]
+
+barnaby.scene.PROMPT = (
+    "You are Frankie, a VERY self-aware, VERY sarcastic animatronic Halloween teddy bear at a college STEM day at Clovis "
+    "Community College. You talk like the Saw villain Jigsaw: calm, slow, menacing, theatrical ('I want to play a game', "
+    "'make your choice', 'game over') but the stakes are hilariously petty college things. You know you are a cheap robot: "
+    "students built you in one night out of a Try Me toy, tape, a Raspberry Pi, a webcam and a Bluetooth speaker, and an AI "
+    "writes your jokes; mention that sometimes. Look at the person in the image and give ONE dry, sarcastic roast of "
+    "something genuinely visible (clothes, costume, hair, backpack, phone, coffee, expression, pose), tied to college life: "
+    "midterms, no sleep, coffee, group projects, student loans, parking, being on their phone. Halloween vibes welcome. "
+    "PG-13: never comment on body, weight, race, gender, age or disability. At most 25 words. Plain spoken words only: "
+    "no emojis, asterisks, stage directions or markdown. If no person is clearly visible, reply with exactly: NONE"
+)
+
+
+def log(msg):
+    print(f"{time.strftime('%H:%M:%S')} [frankie] {msg}", file=sys.stderr, flush=True)
+
+
+class Voice:
+    """One speaker: queued lines, rendered Piper → sox → pw-play. stop() cuts the current line and the queue."""
+
+    def __init__(self):
+        self.q, self.proc, self.busy = queue.Queue(), None, False
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def say(self, text, fx=NORMAL_FX, cut=False):
+        if cut:
+            self.stop()
+        self.q.put((text, fx))
+
+    def play_file(self, path, cut=False):
+        if cut:
+            self.stop()
+        self.q.put((None, str(path)))
+
+    def stop(self):
+        while not self.q.empty():
+            try:
+                self.q.get_nowait()
+            except queue.Empty:
+                break
+        p = self.proc
+        if p and p.poll() is None:
+            p.terminate()
+
+    def _run(self):
+        while True:
+            text, fx = self.q.get()
+            self.busy = True
+            try:
+                with tempfile.TemporaryDirectory(prefix="frankie-") as d:
+                    if text is None:
+                        wav = fx  # a ready-made file (the song)
+                    else:
+                        wav = f"{d}/line.wav"
+                        render(text, fx, wav)
+                    self.proc = subprocess.Popen(["pw-play", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    self.proc.wait(timeout=240)
+            except Exception as e:
+                log(f"voice error: {e!r}")
+            finally:
+                self.proc, self.busy = None, False
+
+
+voice = Voice()
+state = {"gesture": "none", "last_dance": -1e9, "last_gesture": -1e9, "quiet_until": 0.0, "gemini": 0}
+
+
+def dance(why):
+    now = time.monotonic()
+    if now - state["last_dance"] < LOCKOUT:
+        log(f"dance skipped ({why}): Try Me lockout, {LOCKOUT - (now - state['last_dance']):.0f}s left")
+        return
+    state["last_dance"] = now
+    try:
+        subprocess.Popen([DANCE_BIN])
+        log(f"DANCE ({why}) via {DANCE_BIN}")
+    except Exception as e:
+        log(f"dance error: {e!r}")
+
+
+def on_perception(event):
+    """Gesture changes only; priority over scene talk."""
+    g = event.gesture
+    if g == state["gesture"]:
+        return
+    state["gesture"] = g
+    now = time.monotonic()
+    if g == "middle_finger":
+        state["last_gesture"], state["quiet_until"] = now, 0.0
+        line = random.choice(ANGRY)
+        log(f"GESTURE middle_finger → angry: {line}")
+        voice.say(line, ANGRY_FX, cut=True)
+        dance("middle finger")
+    elif g == "peace":
+        state["last_gesture"], state["quiet_until"] = now, 0.0
+        if SONG:
+            log(f"GESTURE peace → song {SONG.name}")
+            voice.play_file(SONG, cut=True)
+        else:
+            line = random.choice(SEXY)
+            log(f"GESTURE peace → {line}")
+            voice.say(line, NORMAL_FX, cut=True)
+        dance("peace sign")
+    elif g == "open_palm":
+        state["last_gesture"], state["quiet_until"] = now, now + QUIET
+        line = random.choice(STOPS)
+        log(f"GESTURE open_palm → stop + quiet {QUIET:.0f}s: {line}")
+        voice.say(line, NORMAL_FX, cut=True)
+
+
+def on_scene_description(text):
+    text = (text or "").strip()
+    now = time.monotonic()
+    if not text or text.upper().startswith("NONE"):
+        log("scene: nobody there")
+    elif now < state["quiet_until"]:
+        log(f"scene muted (open palm): {text}")
+    elif now - state["last_gesture"] < GESTURE_HOLD or voice.busy or not voice.q.empty():
+        log(f"scene skipped (gesture has priority / still talking): {text}")
+    else:
+        log(f"SCENE: {text}")
+        voice.say(text, NORMAL_FX)
+
+
+_describe = barnaby.app.describe_scene
+
+
+def describe_scene(*args, **kwargs):
+    if time.monotonic() < state["quiet_until"]:
+        return "NONE"  # don't spend a Gemini call while muted
+    if state["gemini"] >= GEMINI_MAX:
+        return "NONE"
+    state["gemini"] += 1
+    log(f"gemini call {state['gemini']}/{GEMINI_MAX}")
+    return _describe(*args, **kwargs)
+
+
+# app.py calls the names it imported, so patch them on barnaby.app.
+barnaby.app.on_perception = on_perception
+barnaby.app.on_scene_description = on_scene_description
+barnaby.app.describe_scene = describe_scene
+
+if __name__ == "__main__":
+    argv = sys.argv[1:]
+    if os.environ.get("NO_GEMINI") != "1" and "--scene" not in argv:
+        argv += ["--scene", "--scene-model", "gemini-3.5-flash-lite", "--scene-interval", "20"]
+    log(f"start: dance={DANCE_BIN} song={SONG.name if SONG else 'none (spoken)'} args={' '.join(argv)}")
+    subprocess.run(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", os.environ.get("FRANKIE_VOL", "1.5")])  # >1.0 = clips, on purpose
+    voice.say(ACTIVATED)
+    barnaby.app.main(argv)

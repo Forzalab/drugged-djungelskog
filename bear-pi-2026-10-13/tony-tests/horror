@@ -1,0 +1,4 @@
+#!/bin/bash
+# horror — one-command Barnaby horror show (~60 s). DRY=1 = rehearsal (no GPIO, no sound), NO_DANCE=1 = no dances.
+export XDG_RUNTIME_DIR=/run/user/1000
+exec /home/spauly/Desktop/barnaby/evil-autonomous-bear-proj/.venv/bin/python /home/spauly/tony-tests/horror.py "$@"

@@ -1,0 +1,3 @@
+# 2026-10-13T19:00:37.990930Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: '361:ULTRON_EVERY = 45.0     # Tony STEM-day outdoors: 75→45\n376:    AMBIENT_LINES = list(ambient.LINES)\n378:    AMBIENT_LINES = []\n384:    """British voice, slow, low, distorted; optional howl prefix."""\n392:    howl = Path.home() / "tony-tests" / "howl.wav"\n393:    if howl_on and howl.is_file():\n39'
+cd ~/tony-tests; grep -n "random() < 0.5\|ULTRON_EVERY\|howl\b\|howl =\|def render_ultron\|def ultron\|_ambient_next\|AMBIENT" frankie_pipe.py | head -20; sed -n '/^ULTRON_PROMPT = (/,/^)/p' frankie_pipe.py

@@ -1,0 +1,3 @@
+# 2026-10-13T19:05:14.587350Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: '5225 /bin/bash -c source /home/spauly/.claude/shell-snapshots/snapshot\n5228 /bin/bash /home/spauly/tony-tests/guardian.sh\n2026 /bin/bash ./bear_loop.sh\n4832 .venv/bin/python -u /home/spauly/tony-tests/scene_cam.py\n4850 .venv/bin/python -u /home/spauly/tony-tests/frankie.py --source 0\n2026-10-13 11:2'
+kill 2109; setsid nohup /home/spauly/tony-tests/guardian.sh >/dev/null 2>&1 < /dev/null & sleep 3; pgrep -af 'guardian.sh|^bash -c while true' | cut -c1-70; pgrep -af '^/bin/bash .*bear_loop[.]sh$|^[^ ]*python -u [^ ]*(scene_cam|frankie)' | cut -c1-80; tail -3 /home/spauly/tony-tests/boot.log
