@@ -1,0 +1,3 @@
+# 2026-10-13T19:43:02.852867Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: '12:43:43\n2026 /bin/bash ./bear_loop.sh\n7065 .venv/bin/python -u /home/spauly/tony-tests/frankie.py --source 0\n10525 /home/spauly/Desktop/barnaby/evil-autonomous-bear-proj/.venv/bin/python -u /home/spauly/tony-t\n10530 /home/spauly/Desktop/barnaby/evil-autonomous-bear-proj/.venv/bin/python -u /home/sp'
+until [ $SECONDS -gt 35 ]; do sleep 5; done; date +%T; pgrep -af '^/bin/bash .*(dance_loop|bear_loop)[.]sh$|^[^ ]*python -u [^ ]*(scene_cam|frankie|polyglot)' | cut -c1-100; ls ~/tony-tests/NO_* 2>&1 | head -2

@@ -1,0 +1,3 @@
+# 2026-10-13T19:55:24.903177Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: 'bear_loop.sh\nfrankie.py --source 0\nscene_cam.py or\nscene_cam.py gemini\n528:            if AMBIENT_LINES and random.random() < 1.01:  # 12:05: hardcoded only; scene_cam.py does the live AI scene'
+cd ~/tony-tests && touch NO_POLY NO_DANCE && kill $(pgrep -f '^[^ ]*python -u [^ ]*polyglot[.]py$') $(pgrep -f '^/bin/bash .*dance_loop[.]sh$') 2>/dev/null; sleep 1; pgrep -af '^/bin/bash .*(dance_loop|bear_loop)[.]sh$|^[^ ]*python -u [^ ]*(scene_cam|frankie|polyglot)' | sed 's|.*tony-tests/||'; grep -n "random.random() < 1.01" frankie_pipe.py

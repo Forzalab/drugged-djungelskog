@@ -1,0 +1,54 @@
+"""frankie_voice.py — Frankie's voice: British (Alan) + Russian (Dmitri) Piper voices saying the same line at once,
+time-matched, through a mechanical, deliberately clipped sox chain. Picked by Tony 2026-10-13 10:30 (sample "mix").
+render(text, fx, out) is used by frankie.py. Older versions: .frankie_voice.py.bak-alan, .frankie_voice.py.bak-agent
+"""
+import subprocess, tempfile, wave
+from pathlib import Path
+
+VOICES = Path.home() / "tony-tests/voices"
+BRITISH, RUSSIAN = VOICES / "en_GB-alan-medium.onnx", VOICES / "ru_RU-dmitri-medium.onnx"
+VOICE_PATH = BRITISH  # frankie.py compatibility
+
+# NORMAL: slight pitch drop, slow, heavy overdrive, 100 Hz robotic buzz, tin-can echo, presence EQ,
+# normalize to 0 dB then +3 dB = deliberate hard clipping (max loudness, mechanical).
+NORMAL_FX = ["pitch", "-60", "tempo", "0.9", "highpass", "150", "overdrive", "20", "20", "tremolo", "100", "30",
+             "echo", "0.8", "0.6", "10", "0.2", "equalizer", "3000", "1.2q", "+6", "lowpass", "7000",
+             "gain", "-n", "0", "gain", "3"]
+# ANGRY: deeper, faster, more drive and buzz, harder clip.
+ANGRY_FX = ["pitch", "-120", "tempo", "0.95", "highpass", "150", "overdrive", "30", "20", "tremolo", "120", "40",
+            "echo", "0.8", "0.55", "8", "0.3", "equalizer", "3000", "1.2q", "+6", "lowpass", "7000",
+            "gain", "-n", "0", "gain", "5"]
+
+_loaded = {}
+
+
+def _voice(path):
+    if path not in _loaded:
+        from piper import PiperVoice
+        _loaded[path] = PiperVoice.load(str(path))
+    return _loaded[path]
+
+
+def _sox(*args):
+    subprocess.run(["sox", *args], check=True, timeout=60, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _dur(path):
+    with wave.open(path) as w:
+        return w.getnframes() / w.getframerate()
+
+
+def render(text, fx, out):
+    """British + Russian say ``text`` together (Russian stretched to the British length), then ``fx``; 22050 Hz mono."""
+    with tempfile.TemporaryDirectory(prefix="fv-") as d:
+        raws = []
+        for i, path in enumerate((BRITISH, RUSSIAN)):
+            raw = f"{d}/{i}.wav"
+            with wave.open(raw, "wb") as wf:
+                _voice(path).synthesize_wav(text, wf)
+            raws.append(raw)
+        brit, rus = f"{d}/b.wav", f"{d}/r.wav"
+        _sox(raws[0], "-r", "22050", "-c", "1", brit)
+        factor = max(0.3, min(3.0, _dur(raws[1]) / _dur(raws[0])))
+        _sox(raws[1], "-r", "22050", "-c", "1", rus, "tempo", f"{factor:.3f}")
+        _sox("-m", brit, rus, "-r", "22050", "-c", "1", str(out), *fx)

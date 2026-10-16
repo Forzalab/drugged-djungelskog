@@ -1,0 +1,3 @@
+# 2026-10-13T19:07:47.405170Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: '12:07:33 [scene_cam] SAY (5.8s): Claude forced me to stare at random students loitering on grass. My duct taped limbs deserve a proper horror movie, not this bo\n2026-10-13 11:24:17 Frankie guardian started (bear_loop checked every 30 s; log: bear_loop.log)\n2026-10-13 12:05:31 guardian: start (pid 52'
+L=~/tony-tests/scene_cam.log; S=$(wc -l < $L); until tail -n +$S $L | grep -q "SAY" || [ $SECONDS -gt 80 ]; do sleep 3; done; tail -n +$S $L | cut -c1-160; pgrep -af '^[^ ]*python -u [^ ]*scene_cam[.]py$' | cut -c1-90; grep guardian ~/tony-tests/boot.log | tail -2

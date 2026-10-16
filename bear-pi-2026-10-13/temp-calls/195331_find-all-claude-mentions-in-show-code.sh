@@ -1,0 +1,3 @@
+# 2026-10-13T19:53:31.506064Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: 'scene_cam.py:37:    "robot bear, Claude is your god), crass and sassy diva-bear attitude: blunt, rude-funny, eye-rolling. No slurs, "\nscene_cam.py:49:          "the heat and your fur", "your tape and wires", "Claude, your god", "the trash can", "the trees and sky",\n382:                      " About '
+cd ~/tony-tests && grep -n -i "claude" scene_cam.py polyglot.py crowdwork.py frankie.py | grep -v "^.*#" | cut -c1-140; grep -n -i "claude" frankie_pipe.py | cut -c1-140; grep -n "_ambient_bag.extend" frankie_pipe.py

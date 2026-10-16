@@ -1,0 +1,3 @@
+# 2026-10-13T19:22:54.703227Z UTC  agent=a37c36  (verbatim command from transcript; secrets REDACTED)
+# result head: '#!/bin/bash\n# guardian.sh — keep the show running forever: every 30 s make sure bear_loop.sh (→ frankie.py) and scene_cam.py run.\n# Started by boot.sh. Honors ~/tony-tests/NO_BEAR (Frankie off) and ~/tony-tests/NO_SCENE (scene narrator off).\nT=/home/spauly/tony-tests\nPY=/home/spauly/Desktop/barnaby/'
+cd /home/spauly/tony-tests; cat guardian.sh; sed -n 1,60p frankie_voice.py; grep -n "sound_playing" -A4 scene_cam.py | head; espeak-ng --version; espeak-ng --voices | grep -i ja

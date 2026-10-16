@@ -1,0 +1,106 @@
+"""frankie_voice.py — Frankie's voice collage (Tony 2026-10-13 10:40): always the ANGRY voice first (British on top +
+low distorted Russian underneath), then the rest of the line in random chunks: angry / Russian only / high baby,
+with an occasional short bear growl before or after the line (P_GROWL). Whole thing ends in a mechanical, deliberately clipped chain (max loudness).
+render(text, fx, out) is used by frankie.py (fx is ignored: one voice for everything).
+Older versions: .frankie_voice.py.bak-mix2 / -mix1 / -alan / -agent
+"""
+import random, re, subprocess, tempfile, wave
+from pathlib import Path
+
+VOICES = Path.home() / "tony-tests/voices"
+BRITISH, RUSSIAN = VOICES / "en_GB-alan-medium.onnx", VOICES / "ru_RU-dmitri-medium.onnx"
+VOICE_PATH = BRITISH  # frankie.py compatibility
+NORMAL_FX = ANGRY_FX = "angry"
+
+BRIT_ANGRY = ["pitch", "-80", "tempo", "0.95", "overdrive", "3", "6", "tremolo", "32", "18"]  # 32 Hz rasp = animal purr/growl texture (Tony 11:20)
+RUS_LOW = ["pitch", "-450", "tempo", "0.95", "overdrive", "8", "10", "gain", "-3", "lowpass", "2500"]  # -3 dB headroom: no lowpass clip
+BABY = ["pitch", "+750", "tempo", "0.85", "overdrive", "4", "10"]
+RUS_UNDER = 0.3  # Russian layer volume under the British in the angry voice
+FINAL = ["highpass", "120", "tremolo", "100", "5", "echo", "0.8", "0.6", "10", "0.2",
+         "equalizer", "3000", "1.2q", "+6", "lowpass", "7500", "gain", "-n", "-0.5"]  # loud, no clipping
+# Growl (Tony 11:xx "sassy"): real-bear rumble, not a bass drop. Brown noise + low sawtooth (~80-110 Hz, slight
+# downward slide) with fast 25-35 Hz tremolo = raspy flutter, steep bandpass 150-900 Hz (no sub-bass), light overdrive,
+# quick fade in/out. Length 0.45-0.6 s. GROWL is the default recipe; _growl() randomizes it a little per use.
+GROWL = ["synth", "0.5", "brownnoise", "mix", "sawtooth", "105-85", "gain", "-8", "tremolo", "30", "70",
+         "sinc", "150-900", "overdrive", "6", "8", "fade", "0.04", "0.5", "0.15", "gain", "-n", "-3"]
+P_GROWL = 0.33  # ~1 in 3 lines gets ONE short growl, before the line or at the end (never mid-line)
+STYLES, WEIGHTS = ["angry"], [1.0]  # Tony 10:45: only angry (was angry/russian/baby)
+
+_loaded = {}
+
+
+def _voice(path):
+    if path not in _loaded:
+        from piper import PiperVoice
+        _loaded[path] = PiperVoice.load(str(path))
+    return _loaded[path]
+
+
+def _sox(*args):
+    subprocess.run(["sox", *args], check=True, timeout=60, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _dur(path):
+    with wave.open(path) as w:
+        return w.getnframes() / w.getframerate()
+
+
+def _synth(path, text, out):
+    with wave.open(out, "wb") as wf:
+        _voice(path).synthesize_wav(text, wf)
+
+
+def _chunks(text):
+    """Split at punctuation; a single long clause is cut every ~5 words."""
+    parts = [p.strip() for p in re.split(r"(?<=[.,!?;:])\s+", text) if p.strip()]
+    if len(parts) == 1 and len(text.split()) > 8:
+        w = text.split()
+        parts = [" ".join(w[i:i + 5]) for i in range(0, len(w), 5)]
+    return parts
+
+
+def _chunk(style, text, d, i):
+    """One chunk in one style → normalized 22050 Hz mono wav path."""
+    out, a, b = f"{d}/c{i}.wav", f"{d}/a{i}.wav", f"{d}/b{i}.wav"
+    if style == "baby":
+        _synth(BRITISH, text, a)
+        _sox(a, "-r", "22050", "-c", "1", out, *BABY, "gain", "-n", "-3")
+    elif style == "russian":
+        _synth(RUSSIAN, text, a)
+        _sox(a, "-r", "22050", "-c", "1", out, *RUS_LOW, "gain", "-n", "-3")
+    else:  # angry: British on top + low Russian underneath, Russian stretched to the British length
+        _synth(BRITISH, text, a)
+        _synth(RUSSIAN, text, b)
+        brit, rus = f"{d}/ab{i}.wav", f"{d}/ar{i}.wav"
+        _sox(a, "-r", "22050", "-c", "1", brit, *BRIT_ANGRY, "gain", "-n", "-3")
+        factor = max(0.3, min(3.0, _dur(b) / max(_dur(a), 0.05)))
+        _sox(b, "-r", "22050", "-c", "1", rus, "tempo", f"{factor:.3f}", *RUS_LOW, "gain", "-n", "-3")
+        _sox("-m", "-v", "1", brit, "-v", str(RUS_UNDER), rus, "-r", "22050", "-c", "1", out, "gain", "-n", "-3")
+    return out
+
+
+def _growl(out, rng=random):
+    """One short (<=0.6 s) bear growl wav, slightly different every time."""
+    dur = rng.uniform(0.45, 0.6)
+    f0 = rng.uniform(95, 110)
+    f1 = max(80.0, f0 - rng.uniform(10, 20))
+    _sox("-n", "-r", "22050", "-c", "1", out, "synth", f"{dur:.2f}", "brownnoise", "mix", "sawtooth", f"{f0:.0f}-{f1:.0f}",
+         "gain", "-8", "tremolo", f"{rng.uniform(25, 35):.1f}", "70", "sinc", "150-900", "overdrive", "6", "8",
+         "fade", "0.04", f"{dur:.2f}", "0.15", "gain", "-n", "-3")
+    return out
+
+
+def render(text, fx=None, out="frankie.wav", rng=random):
+    with tempfile.TemporaryDirectory(prefix="fv-") as d:
+        parts = []
+        for i, chunk in enumerate(_chunks(text)):
+            style = "angry" if i == 0 else rng.choices(STYLES, WEIGHTS)[0]
+            parts.append(_chunk(style, chunk, d, i))
+        # Tony 11:20: EVERY turn opens with an animal sound: crow caw or bear growl
+        crow = Path.home() / "tony-tests" / "crow.wav"
+        if parts:
+            if crow.is_file() and rng.random() < 0.55:
+                parts.insert(0, str(crow))
+            else:
+                parts.insert(0, _growl(f"{d}/growl.wav", rng))
+        _sox(*parts, str(out), *FINAL)

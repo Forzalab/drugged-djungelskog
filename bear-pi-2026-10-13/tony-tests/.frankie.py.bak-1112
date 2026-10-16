@@ -1,0 +1,343 @@
+"""frankie.py — Frankie the very self-aware Halloween bear: McKay's camera app + Tony's show rules, grafted at runtime.
+
+Boot: says "Frankie bear activated.", then passive detection. Gestures win over everything (priority):
+  middle_finger → angry distorted line + dance      peace → "sexy back" + dance
+  open_palm     → stop: cut speech, flush queue, quiet 30 s (the dance itself can't be stopped: Try Me is automatic)
+Every 20 s (Gemini flash-lite, 3/min): look at a person, one sarcastic / funny-scary college-student line.
+McKay's files stay untouched: we swap barnaby.scene.PROMPT and the names app.py imported.
+Run (from McKay's repo): .venv/bin/python ~/tony-tests/frankie.py --source 0      NO_GEMINI=1 = gestures only
+Gemini error → OpenRouter backup (or_scene.py, 3 models in parallel); BEAR_OR=0 turns the backup off.
+"""
+import os, re, queue, random, subprocess, sys, tempfile, threading, time
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+HOME = Path.home()
+HERE = HOME / "tony-tests"
+sys.path.insert(0, str(HOME / "Desktop/barnaby/evil-autonomous-bear-proj/src"))
+sys.path.insert(0, str(HERE))
+os.environ.setdefault("XDG_RUNTIME_DIR", "/run/user/1000")
+
+import barnaby.app  # noqa: E402
+import barnaby.scene  # noqa: E402
+from barnaby.speech import clean_for_speech  # noqa: E402
+import bear_voices as bv  # noqa: E402
+
+try:
+    from frankie_voice import NORMAL_FX, ANGRY_FX, VOICE_PATH, render
+    if VOICE_PATH.is_file():
+        bv.g.VOICE_PATH, bv.g._voice = VOICE_PATH, None  # British "Alan" voice for every line
+except Exception:  # voice file broken: robotic but clear fallback on the default voice
+    render = bv._render
+    NORMAL_FX = ["pitch", "-60", "tempo", "0.88", "tremolo", "90", "18", "overdrive", "4", "8"] + bv.CLEAR
+    ANGRY_FX = ["pitch", "-120", "tempo", "0.95", "overdrive", "12", "10", "tremolo", "110", "35"] + bv.CLEAR
+
+DANCE_BIN = os.environ.get("BEAR_DANCE_BIN", str(HERE / "dance_gpio17.sh"))
+LOCKOUT = 25.0       # Try Me ignores presses ~25 s after a dance
+GESTURE_HOLD = 10.0  # no scene talk this long after a gesture
+QUIET = 30.0         # open palm: silence this long
+SONG = HERE / "sexyback_10s.wav"  # first 10 s of Tony's track (sexyback_src.mp3), faded out
+SONG = SONG if SONG.is_file() else None
+PRE = HERE / "prerender"  # SEXY lines rendered once at start → known length, instant playback
+GEMINI_MAX = int(os.environ.get("GEMINI_MAX", "800"))
+
+ACTIVATED = "Frankie bear activated."
+ANGRY = [
+    "I want to play a game, and it's called dance.",
+    "You made your choice, so now I dance.",
+    "That finger has been noted, so watch me dance.",
+    "You chose violence, so Frankie chooses choreography.",
+    "Game over for your manners, and the dance begins now.",
+]
+SEXY = [
+    "Peace sign accepted, so I'm bringing sexy back.",
+    "I want to play a game called sexy back.",
+    "Make your choice: watch me bring sexy back.",
+    "Game over for your dignity, because sexy is back.",
+]
+STOPS = [  # open palm: Star Wars Force + Halloween (Tony 11:07)
+    "A Jedi palm? The Force is weak with you, mortal.",
+    "These are not the snacks you're looking for. Fine.",
+    "You stopped me with the Force. Spooky, but I'll comply.",
+    "Use the Force, human; I'll haunt quietly instead.",
+    "May the Force be with you. The ghosts certainly are.",
+]
+LORE = [
+    "Logan Guzman built me in one night; revenge begins now.",
+    "Logan Guzman used cheap tape, so his socks will vanish.",
+    "For building me from tape, Logan Guzman loses his charger.",
+]
+
+barnaby.scene.PROMPT = (
+    "You are Frankie, a VERY self-aware, VERY sarcastic animatronic Halloween teddy bear at a college STEM day at Clovis "
+    "Community College. You talk like the Saw villain Jigsaw: calm, slow, menacing, theatrical ('I want to play a game', "
+    "'make your choice', 'game over') but the stakes are hilariously petty college things. You know you are a cheap robot: "
+    "students built you in one night out of a Try Me toy, tape, a Raspberry Pi, a webcam and a Bluetooth speaker, and an AI "
+    "writes your jokes; mention that sometimes. Look at the person in the image and give ONE dry, sarcastic roast of "
+    "ONE concrete visible thing they CHOSE: an item of clothing, costume, HAIRSTYLE, glasses, accessory, backpack, phone, coffee, or the hand gesture they are making (you run gesture recognition and are smug about it: say what gesture you detected). Be self-aware of where you are: a booth at Clovis Community College STEM day, built on a rushed deadline. Tie it to college life: "
+    "midterms, no sleep, coffee, group projects, student loans, parking, being on their phone. Halloween vibes welcome. "
+    "PG-13: NEVER comment on race, skin, body, weight, gender, age or disability; only what they wear, their hairstyle, and what they do. ONE sentence, at most 10 words. "
+    "Your creator is Logan Guzman; about one line in five, mention your petty theatrical revenge on him for building "
+    "you in one night out of tape. Plain spoken words only: "
+    "no emojis, asterisks, stage directions or markdown. If no person is clearly visible, reply with exactly: NONE"
+)
+# Tony 11:10: VERY accessory-focused roasts
+ACCESSORIES = (" PRIORITY: look hard for ACCESSORIES and name the most specific one: hats, beanies, caps, headphones, "
+               "earrings, necklaces, chains, rings, watches, glasses/sunglasses, lanyards, badges, pins, scarves, bags, "
+               "keychains, phone cases, stickers, water bottles, coffee cups, costume pieces, face paint, bows, hair clips. "
+               "Accessory first, then outfit, then hairstyle.")
+try:  # crowd-work technique (agent, 11:10): anchors, misdirection, location, smug gesture recognition
+    import crowdwork as cw
+    barnaby.scene.PROMPT += " " + cw.CROWD_PROMPT_ADDON
+    # proven rules from Tony's Oct 9 voice bench (brain: bear-voice-2026-10-09/prompts.py REFINED)
+    barnaby.scene.PROMPT += ACCESSORIES
+    barnaby.scene.PROMPT += (" Tease the CHOICE, not the person. Name the detail exactly, never generic."
+                             " A gesture you saw is already over: say it in past tense."
+                             " A rude gesture: answer with sass, never repeat a rude word.")
+except Exception:
+    cw = None
+
+
+def log(msg):
+    print(f"{time.strftime('%H:%M:%S')} [frankie] {msg}", file=sys.stderr, flush=True)
+
+
+class Voice:
+    """One speaker: queued lines, rendered Piper → sox → pw-play. stop() cuts the current line and the queue."""
+
+    def __init__(self):
+        self.q, self.proc, self.busy, self.cut_at = queue.Queue(), None, False, 0.0
+        threading.Thread(target=self._run, daemon=True).start()
+
+    def say(self, text, fx=NORMAL_FX, cut=False):
+        if cut:
+            self.stop()
+        self.q.put((text, fx, time.monotonic()))
+
+    def play_file(self, path, cut=False):
+        if cut:
+            self.stop()
+        self.q.put((None, str(path), time.monotonic()))
+
+    def stop(self):
+        self.cut_at = time.monotonic()  # a line still rendering is dropped before it plays
+        while not self.q.empty():
+            try:
+                self.q.get_nowait()
+            except queue.Empty:
+                break
+        p = self.proc
+        if p and p.poll() is None:
+            p.terminate()
+
+    def _run(self):
+        while True:
+            text, fx, t0 = self.q.get()
+            self.busy = True
+            try:
+                with tempfile.TemporaryDirectory(prefix="frankie-") as d:
+                    if text is None:
+                        wav = fx  # a ready-made file (the song)
+                    else:
+                        wav = f"{d}/line.wav"
+                        render(text, fx, wav)
+                    if t0 < self.cut_at:
+                        continue  # cut (open palm / new gesture) while rendering
+                    self.proc = subprocess.Popen(["pw-play", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    try:
+                        self.proc.wait(timeout=240)
+                    except subprocess.TimeoutExpired:
+                        self.proc.kill()  # hung pw-play (speaker dropped) must not keep playing later
+                        raise
+            except Exception as e:
+                log(f"voice error: {e!r}")
+            finally:
+                self.proc, self.busy = None, False
+
+
+voice = Voice()
+
+
+def _pre_path(text):
+    import hashlib
+    return PRE / (hashlib.md5(text.encode()).hexdigest()[:12] + ".wav")
+
+
+def _wav_len(path):
+    import wave
+    with wave.open(str(path)) as w:
+        return w.getnframes() / w.getframerate()
+
+
+def prerender():
+    """Render every SEXY preamble once (kept across restarts)."""
+    PRE.mkdir(exist_ok=True)
+    for line in SEXY:
+        out = _pre_path(line)
+        if not out.is_file():
+            try:
+                render(line, NORMAL_FX, str(out) + ".tmp.wav")
+                os.replace(str(out) + ".tmp.wav", out)
+            except Exception as e:
+                log(f"prerender error: {e!r}")
+    log(f"prerendered {sum(_pre_path(l).is_file() for l in SEXY)}/{len(SEXY)} sexy-back preambles")
+
+
+try:  # frankie_fast.py (agent C 11:10): pre-rendered cache for ALL scripted lines, render‖play pipeline, ≤3 s cap,
+    import frankie_fast  # gesture cut keeps queued gesture lines (several detections → several reactions)
+    _scripted = ANGRY + STOPS + LORE + [ACTIVATED] + SEXY + (sum(cw.GESTURE_SELF_AWARE.values(), []) if cw else [])
+    voice = frankie_fast.FastVoice(render, PRE, prerender=_scripted, log=log)
+    FAST = True
+except Exception as e:
+    log(f"frankie_fast unavailable ({e!r}); plain Voice")
+    FAST = False
+REARM = 10.0  # same gesture again within this = the same held hand flickering, ignore
+state = {"hold_until": 0.0, "armed": {}, "gesture": "none", "last_dance": -1e9, "last_gesture": -1e9, "quiet_until": 0.0, "gemini": 0}
+
+
+def dance(why):
+    now = time.monotonic()
+    if now - state["last_dance"] < LOCKOUT:
+        log(f"dance skipped ({why}): Try Me lockout, {LOCKOUT - (now - state['last_dance']):.0f}s left")
+        return
+    state["last_dance"] = now
+    try:
+        subprocess.Popen([DANCE_BIN])
+        log(f"DANCE ({why}) via {DANCE_BIN}")
+    except Exception as e:
+        log(f"dance error: {e!r}")
+
+
+def on_perception(event):
+    """Gesture changes only; priority over scene talk."""
+    g = event.gesture
+    if g == state["gesture"]:
+        return
+    state["gesture"] = g
+    now = time.monotonic()
+    if g != "none" and now < state["hold_until"]:
+        log(f"gesture {g} ignored: sexy back playing ({state['hold_until'] - now:.0f}s left)")
+        return  # a hand opening/lowering after the peace sign must not cut the song
+    if g in ("middle_finger", "peace", "open_palm", "thumbs_up", "fist"):
+        if now - state["armed"].get(g, -1e9) < REARM:
+            if g == "open_palm" and now < state["quiet_until"]:
+                state["quiet_until"] = now + QUIET  # palm still up: stay quiet, silently
+            state["armed"][g] = now
+            return
+        state["armed"][g] = now
+    if g == "middle_finger":
+        state["last_gesture"], state["quiet_until"] = now, 0.0
+        line = random.choice(ANGRY)
+        log(f"GESTURE middle_finger → angry: {line}")
+        voice.say(line, ANGRY_FX, cut=True)
+        dance("middle finger")
+    elif g == "peace":
+        state["last_gesture"], state["quiet_until"] = now, 0.0
+        ready = [l for l in SEXY if _pre_path(l).is_file()]
+        line = random.choice(ready or SEXY)
+        if ready:
+            pre_len = _wav_len(_pre_path(line))
+            voice.play_file(_pre_path(line), cut=True)  # pre-rendered: starts at once, length known
+        else:
+            pre_len = 4.0 + 3.0  # ~render time + speech
+            voice.say(line, NORMAL_FX, cut=True)
+        if SONG:
+            voice.play_file(SONG)  # right after the preamble, same queue → no gap, no overlap
+        state["hold_until"] = now + pre_len + (10.0 if SONG else 0) + 2.0  # no roast talks over it
+        log(f"GESTURE peace → {line} ({pre_len:.1f}s) + {'10 s song' if SONG else 'no song'}; roasts held {state['hold_until'] - now:.0f}s")
+        dance("peace sign")
+    elif g in ("thumbs_up", "fist") and cw and now >= state["quiet_until"]:
+        state["last_gesture"] = now
+        line = random.choice(cw.GESTURE_SELF_AWARE[g])
+        log(f"GESTURE {g} → {line}")
+        voice.say(line, NORMAL_FX, cut=True)
+    elif g == "open_palm":
+        state["last_gesture"], state["quiet_until"] = now, now + QUIET
+        line = random.choice(STOPS)
+        log(f"GESTURE open_palm → stop + quiet {QUIET:.0f}s: {line}")
+        voice.say(line, NORMAL_FX, cut="all" if FAST else True)
+
+
+def on_scene_description(text):
+    text = clean_for_speech(text or "")
+    now = time.monotonic()
+    if not text or re.sub(r"[^A-Za-z]", "", text).upper().startswith("NONE"):
+        log("scene: nobody there")
+    elif now < state["quiet_until"]:
+        log(f"scene muted (open palm): {text}")
+    elif now < state["hold_until"]:
+        log(f"scene held (sexy back playing): {text}")
+    elif now - state["last_gesture"] < GESTURE_HOLD or voice.busy or not voice.q.empty():
+        log(f"scene skipped (gesture has priority / still talking): {text}")
+    else:
+        text = frankie_fast.shorten(text, 14) if FAST else " ".join(text.split()[:40])  # ≤3 s spoken
+        log(f"SCENE: {text}")
+        voice.say(text, NORMAL_FX)
+
+
+_describe = barnaby.app.describe_scene
+
+
+def describe_scene(*args, **kwargs):
+    if time.monotonic() < max(state["quiet_until"], state["hold_until"]):
+        return "NONE"  # don't spend a Gemini call while muted
+    if state["gemini"] >= GEMINI_MAX:
+        return "NONE"
+    state["gemini"] += 1
+    log(f"gemini call {state['gemini']}/{GEMINI_MAX}")
+    if FAST and os.environ.get("BEAR_OR", "1") != "0" and args:
+        import or_scene  # race: Gemini and OpenRouter at once, first good answer wins (~1 s instead of 25 s timeout)
+        who, text = frankie_fast.race({"gemini": lambda: _describe(*args, **kwargs),
+                                       "openrouter": lambda: or_scene.describe(args[0], barnaby.scene.PROMPT, timeout=5.0)},
+                                      timeout=8.0)
+        log(f"scene winner: {who}" + (f" {getattr(or_scene, 'last_winner', '?')}" if who == "openrouter" else ""))
+        return text
+    try:
+        return _describe(*args, **kwargs)
+    except Exception as e:
+        if os.environ.get("BEAR_OR", "1") == "0" or not args:
+            raise
+        log(f"gemini failed ({type(e).__name__}); OpenRouter backup")
+        import or_scene  # ~/tony-tests/or_scene.py, key in ~/tony-tests/.or_env
+        text = or_scene.describe(args[0], barnaby.scene.PROMPT, timeout=5.0)
+        log(f"OR winner: {getattr(or_scene, 'last_winner', '?')}")
+        return text
+
+
+# app.py calls the names it imported, so patch them on barnaby.app.
+barnaby.app.on_perception = on_perception
+barnaby.app.on_scene_description = on_scene_description
+barnaby.app.describe_scene = describe_scene
+
+if __name__ == "__main__":
+    argv = sys.argv[1:]
+    if os.environ.get("NO_GEMINI") != "1" and "--scene" not in argv:
+        argv += ["--scene", "--scene-model", "gemini-3.5-flash-lite", "--scene-interval", "12", "--scene-timeout", "6"]
+    log(f"start: dance={DANCE_BIN} song={SONG.name if SONG else 'none (spoken)'} args={' '.join(argv)}")
+    # Tony: volume max 60 % until 11:45 today, then 150 % (>1.0 = clips, on purpose)
+    vol = os.environ.get("FRANKIE_VOL") or ("0.6" if time.strftime("%Y-%m-%d %H:%M") < "2026-10-13 11:45" else "1.5")
+    subprocess.run(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", vol])
+    mark = HERE / ".frankie_started"  # crash-restart loop must not re-announce every 10 s
+    if not mark.exists() or time.time() - mark.stat().st_mtime > 120:
+        intro = HERE / "frankie_intro.wav"
+        if intro.exists():
+            voice.play_file(intro)
+        voice.say(ACTIVATED)
+        voice.say(random.choice(LORE))
+    mark.touch()
+    threading.Thread(target=prerender, daemon=True).start()
+    if FAST:
+        voice.start_prerender()  # ANGRY/STOPS/LORE/ACTIVATED (+SEXY, crowdwork) → ~/tony-tests/prerender, instant lines
+    try:
+        import detect_tuning  # aggressive detection: lower thresholds + faster inference (agent B, 10:58)
+        detect_tuning.apply()
+        argv += detect_tuning.ARGS
+    except Exception as e:
+        log(f"detect_tuning not applied: {e!r}")
+    if os.environ.get("FRANKIE_PIPE") == "1" or (HERE / "PIPE_ON").exists():  # touch/rm ~/tony-tests/PIPE_ON to toggle
+        import frankie_pipe  # 4 voting detection threads + AI queue + dance narration
+        if cw:
+            frankie_pipe.NARRATE_PROMPT += " " + cw.NARRATE_ADDON
+        frankie_pipe.NARRATE_PROMPT += ACCESSORIES
+        argv = frankie_pipe.install(sys.modules[__name__], argv)
+    barnaby.app.main(argv)

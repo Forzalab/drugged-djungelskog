@@ -1,0 +1,3 @@
+# 2026-10-13T19:08:13.064105Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: '12:08:14\n5468 /home/spauly/Desktop/barnaby/evil-autonomous-bear-proj/.venv/bin/python -u /home/spauly/tony-te\n2026-10-13 12:08:02 guardian: starting scene_cam\n12:08:18 [scene_cam] nothing to say (NONE)'
+until pgrep -f '^[^ ]*python -u [^ ]*scene_cam[.]py$' >/dev/null || [ $SECONDS -gt 45 ]; do sleep 2; done; date +%T; pgrep -af '^[^ ]*python -u [^ ]*scene_cam[.]py$' | cut -c1-100; grep "guardian: starting" ~/tony-tests/boot.log | tail -1; L=~/tony-tests/scene_cam.log; S=$(($(wc -l < $L)+1)); until tail -n +$S $L | grep -q "SAY\|NONE\|error" || [ $SECONDS -gt 100 ]; do sleep 3; done; tail -n +$S $L | cut -c1-160

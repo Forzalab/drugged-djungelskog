@@ -1,0 +1,3 @@
+# 2026-10-13T20:17:06.587598Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: '14751 /bin/bash ./bear_loop.sh\nfrankie.py --source 0\nscene_cam.py or\nscene_cam.py gemini\nscene_cam.py or2\n13:16:17 [scene_or2] SAY (2.5s): and the headline riff would blow the word limit.\n13:16:25 [scene_gemini] SAY (3.4s): Keeney bought this taped mess to watch NPCs wander these boring booths backw'
+cd ~/tony-tests; pgrep -af '^/bin/bash .*bear_loop[.]sh$|^[^ ]*python -u [^ ]*(scene_cam|frankie|cam_view)' | sed 's|.*tony-tests/||'; grep -h "SAY" scene_cam_or.log scene_cam_gemini.log scene_cam_or2.log | sort | tail -4 | cut -c1-160; grep -v qt.qpa bear_loop.log | grep -E "GESTURE|vote" | tail -2 | cut -c1-120; vcgencmd get_throttled

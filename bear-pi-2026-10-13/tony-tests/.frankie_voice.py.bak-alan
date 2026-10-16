@@ -1,0 +1,18 @@
+"""frankie_voice.py — Frankie's voice: British Piper voice (Alan) + Jigsaw-style chains, distorted but clear. Used by frankie.py.
+Picked by Tony 2026-10-13 10:25 (sample A). Agent's first chains: .frankie_voice.py.bak-agent
+"""
+from pathlib import Path
+import bear_voices as bv
+
+VOICE_PATH = Path.home() / "tony-tests/voices/en_GB-alan-medium.onnx"
+
+# NORMAL (Jigsaw, calm and menacing): slight pitch drop (not muddy), slow deliberate pace, mild grit,
+# compand lifts consonants, light 90 Hz buzz (18 %), 10 ms tin-can echo, then the CLEAR legibility EQ.
+NORMAL_FX = ["pitch", "-60", "tempo", "0.88", "overdrive", "5", "8",
+             "compand", "0.01,0.15", "6:-60,-40,-20", "-6", "-90", "0.02",
+             "tremolo", "90", "18", "echo", "0.8", "0.6", "10", "0.2"] + bv.CLEAR
+
+# ANGRY: same voice, harder: more overdrive (headroom first), faster buzz, light phaser; pitch only -120 to stay clear.
+ANGRY_FX = ["pitch", "-120", "tempo", "0.95", "gain", "-6", "overdrive", "12", "12",
+            "compand", "0.005,0.1", "6:-60,-35,-15", "-4", "-90", "0.01",
+            "tremolo", "110", "35", "echo", "0.8", "0.55", "8", "0.3", "phaser", "0.7", "0.7", "2", "0.4", "0.6", "-t"] + bv.CLEAR

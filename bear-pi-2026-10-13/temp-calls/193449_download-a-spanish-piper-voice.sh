@@ -1,0 +1,3 @@
+# 2026-10-13T19:34:49.390379Z UTC  agent=main  (verbatim command from transcript; secrets REDACTED)
+# result head: 'ly 63201294 Oct 13 12:37 es_MX-ald-medium.onnx\nly     4878 Oct 13 12:37 es_MX-ald-medium.onnx.json'
+cd ~/tony-tests/voices && ls | grep -i "^es_" ; [ -f es_MX-ald-medium.onnx ] || { B=https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/medium; curl -sfL -m 180 -o es_MX-ald-medium.onnx.part "$B/es_MX-ald-medium.onnx" && curl -sfL -m 30 -o es_MX-ald-medium.onnx.json "$B/es_MX-ald-medium.onnx.json" && mv es_MX-ald-medium.onnx.part es_MX-ald-medium.onnx; }; ls -la es_* | cut -c25-

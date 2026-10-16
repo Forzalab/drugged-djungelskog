@@ -1,0 +1,21 @@
+#!/bin/bash
+# guardian.sh — keep the show running forever: every 30 s make sure bear_loop.sh (→ frankie.py) and scene_cam.py run.
+# Started by boot.sh. Honors ~/tony-tests/NO_BEAR (Frankie off) and ~/tony-tests/NO_SCENE (scene narrator off).
+T=/home/spauly/tony-tests
+PY=/home/spauly/Desktop/barnaby/evil-autonomous-bear-proj/.venv/bin/python
+export HOME=/home/spauly XDG_RUNTIME_DIR=/run/user/1000 WAYLAND_DISPLAY=wayland-0 DISPLAY=:0
+log() { echo "$(date '+%F %T') guardian: $*" >> "$T/boot.log"; }
+log "start (pid $$)"
+while true; do
+    if [ ! -e "$T/NO_BEAR" ] && ! pgrep -f '^/bin/bash .*bear_loop[.]sh$' >/dev/null; then
+        log "starting bear_loop"
+        setsid nohup "$T/bear_loop.sh" >/dev/null 2>&1 < /dev/null &
+    fi
+    for prov in or gemini; do  # two independent scene narrators (12:18): OpenRouter every 10 s, Gemini every 15 s
+        if [ ! -e "$T/NO_SCENE" ] && ! pgrep -f "^[^ ]*python -u [^ ]*scene_cam[.]py $prov\$" >/dev/null; then
+            log "starting scene_cam $prov"
+            (cd /home/spauly/Desktop/barnaby/evil-autonomous-bear-proj && setsid nohup "$PY" -u "$T/scene_cam.py" "$prov" >/dev/null 2>&1 < /dev/null &)
+        fi
+    done
+    sleep 30
+done

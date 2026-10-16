@@ -1,0 +1,159 @@
+"""scene_cam.py — independent scene narrator (Tony 2026-10-13; two instances since 12:17).
+Every SCENE_EVERY s: screenshot the Pi screen (grim; Frankie's 'Barnaby Bear' camera window is on it, any size) → AI →
+Halloween, self-aware, crass + sassy scene description (≤ 20 words) → Ultron-style British voice (frankie_voice) →
+pw-play. Speech is QUEUED through a shared lock (~/tony-tests/.speak.lock) so instances never talk over each other,
+and each also waits until no other sound (Frankie) is playing.
+  SCENE_PROVIDER=or      OpenRouter (or_scene, 3 models race)      default, every 10 s
+  SCENE_PROVIDER=gemini  Gemini flash-lite (McKay's scene.describe_scene, key from his .env), every 15 s
+Run:  cd ~/Desktop/barnaby/evil-autonomous-bear-proj && SCENE_PROVIDER=or setsid nohup .venv/bin/python -u ~/tony-tests/scene_cam.py &
+Stop: touch ~/tony-tests/NO_SCENE (all instances exit)      Logs: ~/tony-tests/scene_cam_<provider>.log
+"""
+import fcntl, os, random, re, subprocess, sys, tempfile, time
+from collections import deque
+from pathlib import Path
+
+HERE = Path.home() / "tony-tests"
+REPO = Path.home() / "Desktop/barnaby/evil-autonomous-bear-proj"
+sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(REPO / "src"))
+os.environ.setdefault("XDG_RUNTIME_DIR", "/run/user/1000")
+os.environ.setdefault("WAYLAND_DISPLAY", "wayland-0")
+import cv2  # noqa: E402
+import frankie_voice as fv  # noqa: E402
+
+PROVIDER = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("SCENE_PROVIDER", "or")  # arg: or / gemini
+EVERY = float(os.environ.get("SCENE_EVERY", "15"))  # Tony 12:44: detection every 15 s (was 7)
+WORDS = 20  # Tony 12:16: up to 20 words, describe MORE
+HOWL = HERE / "howl.wav"
+LOCK = HERE / ".speak.lock"
+LOG = HERE / f"scene_cam_{PROVIDER}.log"
+PROMPT = (
+    "This is a screenshot of a Raspberry Pi desktop. The window titled 'Barnaby Bear' (small or maximised) shows the "
+    "live camera of Frankie, an animatronic Halloween teddy bear robot sitting OUTDOORS on the grass at Clovis "
+    "Community College STEM day, facing the booths and tents. IGNORE the desktop, terminals and text overlays; describe "
+    "ONLY what the camera window shows (the photo-like outdoor image). You ARE Frankie. In 1-2 sentences of MAXIMUM 20 "
+    "WORDS total (count them; longer replies are thrown away): describe the scene right now in vivid specific detail "
+    "(what people wear and do, colours, objects, booths) with spooky Halloween framing, VERY self-aware (taped-together "
+    "robot bear, Claude is your god), crass and sassy diva-bear attitude: blunt, rude-funny, eye-rolling. No slurs, "
+    "nothing sexual, never about anyone's body, race, gender or age. Plain spoken words, no emojis or stage directions. "
+    "If the camera window is not visible, reply exactly: NONE"
+    # Tony 12:22: the crowd LOVES 'morons' and 'idiots' — more crass, stand-up comedy style
+    " STYLE: stand-up comic doing crowd work: a quick setup then a punchline that lands, roast the crowd and the scene,"
+    " crass and blunt; calling people morons, idiots, clowns or nerds is welcome. Still never slurs, nothing sexual,"
+    " never about bodies, race, gender, age or disability."
+)
+if PROVIDER == "gemini":  # Tony 12:22: let it speak Russian — this narrator is the Russian one
+    PROMPT += (" You speak with a thick Russian accent persona: sprinkle 1-2 real Russian words per line (da, nyet,"
+               " comrade, tovarishch, bozhe moi, babushka), Soviet-robot-bear jokes welcome. Mostly English so people understand.")
+ANGLES = ["the booths and tents", "the people walking by and what they wear", "the grass you are stuck on",
+          "the heat and your fur", "your tape and wires", "Claude, your god", "the trash can", "the trees and sky",
+          "the tables and chairs", "someone looking at their phone", "being ignored", "a robot rival nearby",
+          "Professor Keeney who bought you", "Halloween coming soon", "how creepy you are",
+          "the closest person and their accessories", "what everyone is holding", "the crowd's vibe"]
+recent = deque(maxlen=12)  # no exact repeats
+
+
+def log(msg):
+    line = f"{time.strftime('%H:%M:%S')} [scene_{PROVIDER}] {msg}"
+    print(line, flush=True)
+    with open(LOG, "a") as f:
+        f.write(line + "\n")
+
+
+def short(text, limit=WORDS + 1):
+    """Whole sentences that fit under the limit; else the first clause of ≥5 words; else '' (never cut mid-phrase)."""
+    sents = [x.strip() for x in re.split(r"(?<=[.!?])\s+", text.replace("*", "").strip()) if x.strip()]
+    keep = []
+    for x in sents:
+        if len(" ".join(keep + [x]).split()) >= limit:
+            break
+        keep.append(x)
+    if keep:
+        return " ".join(keep)
+    first = sents[0] if sents else ""
+    for clause in re.split(r"(?<=[,;:])\s+", first):
+        clause = clause.strip().rstrip(",;:")
+        if 5 <= len(clause.split()) < limit:
+            return clause + "."
+    return ""
+
+
+def ask_or(frame, prompt):
+    import or_scene
+    return or_scene.describe(frame, prompt, timeout=6.0)
+
+
+def ask_gemini(frame, prompt):
+    from dotenv import load_dotenv
+    load_dotenv(REPO / ".env")
+    from barnaby import scene
+    scene.PROMPT = prompt  # describe_scene reads the module PROMPT; this process is single-threaded
+    return scene.describe_scene(frame, "gemini-3.5-flash-lite", image_width=768, timeout=8.0)
+
+
+ASK = ask_gemini if PROVIDER == "gemini" else ask_or
+
+
+def sound_playing():
+    return subprocess.run(["pgrep", "-x", "pw-play"], stdout=subprocess.DEVNULL).returncode == 0
+
+
+def speak(text, t_made):
+    with tempfile.TemporaryDirectory(prefix="scam-") as d:
+        raw, out = f"{d}/raw.wav", f"{d}/out.wav"
+        russian = PROVIDER == "gemini"
+        fv._synth(fv.RUSSIAN if russian else fv.BRITISH, text, raw)
+        fv._sox(raw, "-r", "22050", "-c", "1", out, "tempo", "0.9" if russian else "0.88",
+                "pitch", "-200" if russian else "-120", "overdrive", "5" if russian else "4", "8",
+                "tremolo", "6", "20", "echo", "0.8", "0.6", "25", "0.15", "highpass", "180",
+                "compand", "0.005,0.08", "6:-60,-30,-15", "-4", "-90", "0.01", "equalizer", "2800", "1.0q", "+8",
+                "gain", "-n", "-1")
+        if HOWL.is_file() and random.random() < 0.15:
+            fv._sox(str(HOWL), out, f"{d}/h.wav", "gain", "-n", "-1")
+            out = f"{d}/h.wav"
+        with open(LOCK, "w") as lk:
+            fcntl.flock(lk, fcntl.LOCK_EX)  # queue behind the other scene instance
+            for _ in range(60):  # then wait up to ~30 s for Frankie to be quiet
+                if not sound_playing():
+                    break
+                time.sleep(0.5)
+            if time.monotonic() - t_made > 45:
+                log(f"dropped stale (waited too long): {text}")
+                return
+            subprocess.run(["pw-play", out], timeout=90)
+
+
+def main():
+    log(f"start ({PROVIDER}, every {EVERY:.0f} s, ≤{WORDS} words)")
+    while not (HERE / "NO_SCENE").exists():
+        t0 = time.monotonic()
+        try:
+            with tempfile.TemporaryDirectory(prefix="scam-") as d:
+                png = f"{d}/s.png"
+                subprocess.run(["grim", png], check=True, timeout=10)
+                frame = cv2.imread(png)
+            prompt = PROMPT + " This time focus on: " + random.choice(ANGLES) + "."
+            text = (ASK(frame, prompt) or "").strip()
+            if not text or re.sub(r"[^A-Za-z]", "", text).upper().startswith("NONE"):
+                log("nothing to say (NONE)")
+            else:
+                text = short(text)
+                if not text:
+                    log("skipped: reply too long to cut cleanly")
+                elif re.search(r"camera feed|can't (make out|see|tell)|cannot|unable to|as an ai|screenshot|"
+                               r"the image|in this image|i'm sorry|clearly enough|describe", text, re.I):
+                    log(f"skipped AI-speak: {text}")
+                elif text.lower() in (r.lower() for r in recent):
+                    log(f"skipped repeat: {text}")
+                else:
+                    recent.append(text)
+                    log(f"SAY ({time.monotonic() - t0:.1f}s): {text}")
+                    speak(text, t0)
+        except Exception as e:
+            log(f"error: {e!r}")
+        time.sleep(max(1.0, EVERY - (time.monotonic() - t0)))
+    log("NO_SCENE set, exit")
+
+
+if __name__ == "__main__":
+    main()

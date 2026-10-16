@@ -1,0 +1,13 @@
+{
+ "utc": "2026-10-13T20:06:40.541575Z",
+ "agent": "main",
+ "tool": "mcp__claude_ai_TinyFish__search",
+ "input": {
+  "domain_type": "news",
+  "location": "US",
+  "purpose": "Light tech, gaming, Halloween and pop culture headlines for a comedy robot bear at a college STEM day",
+  "query": "tech gaming Halloween pop culture news October 13 2026",
+  "recency_minutes": 2880
+ },
+ "result_head": "{\n  \"query\": \"tech gaming Halloween pop culture news October 13 2026\",\n  \"results\": [\n    {\n      \"date\": \"5 hours ago\",\n      \"position\": 1,\n      \"publisher\": \"Yahoo\",\n      \"site_name\": \"www.yahoo.com\",\n      \"snippet\": \"For those who love pop culture and playing dress-up, nothing beats Halloween. Of course, finding a stylish, memorable costume is easier said than done—and...\",\n      \"title\": \"17 Couples Halloween Costumes Inspired by 2026’s Biggest Pop Culture Moments\",\n      \"url\": \"https:/"
+}
